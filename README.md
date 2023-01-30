@@ -18,7 +18,7 @@ To do that, we first evaluated habitat suitability models relating species prese
 - Workflow
 - Results (sumamrize below)
 - Methods: we provide full description of the methods and links to papers and websites tha can help future users to implement and move forward this initiative. 
-- Species reports: it containg a link to a new html file showing results for every single species included in the analysis. This link is well supported with interactive, statistics, figures and tables.  
+- Species reports: it containg a link to a new html file showing results for every single species included in the analysis. This link is well supported with interactive maps, statistics, figures and tables.  
 
 ## Scripts
 
@@ -62,11 +62,11 @@ For this group of species we were able to run HSMs and classified them based on 
 
 Omission rate (OR) indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): 
 
-+  There is `r kableExtra::text_spec("high concern; OR > 0.50", color="white", background = "red")` in model predictions **(n=13; 14%)**. Most of the species had 3 observations. However, some species with 7-10 observations performed similarly poor. We recommend to let the algorithm run the model (even with 3 observations) and use one of the performance metrics (e.g. OR) to decided model usefulness. We suggest to use alternative ways to inform KBAs initiative, using expert knowledge, current observations and/or critical habitat.
++  There is high concern (> 0.50) in model predictions **(n=13; 14%)**. Most of the species had 3 observations. However, some species with 7-10 observations performed similarly poor. We recommend to let the algorithm run the model (even with 3 observations) and use one of the performance metrics (e.g. OR) to decided model usefulness. We suggest to use alternative ways to inform KBAs initiative, using expert knowledge, current observations and/or critical habitat.
 
 
-+  There is `r kableExtra::text_spec("some concern; OR Between 0.25-0.50", color="white", background = "orange")` in model predictions **(n=7; 7%)**.  This is a group of species with low number of observations (6-13) and intermediate values for OR.  We recommend to treat this species also as a 'concern in model predictions'. We suggest to use alternative ways to inform KBAs initiative, using expert knowledge, current observations and/or critical habitat.
++  There is some concern (0.25-0.50)` in model predictions **(n=7; 7%)**.  This is a group of species with low number of observations (6-13) and intermediate values for OR.  We recommend to treat this species also as a 'concern in model predictions'. We suggest to use alternative ways to inform KBAs initiative, using expert knowledge, current observations and/or critical habitat.
 
 
-+  Model predictions can be `r kableExtra::text_spec("informative; OR <= 0.25", color="white", background = "darkgreen")`  **(n=20; 21%)**: This is a group of species with low to high number of observations (8-47) and high values for OR.  We believe that these models can ofe some relevant information to inform KBAs initiative. We expect that running the group of species with computer performance limitations (n=34; 35%) in a HPC will result in an increase of the percentage of informative models to 40-50%.  The reason: this group of species present huge number of observations. If true, we could expect at least 500 or so informative HSMs for the entire group of ~1,200 species.
++  Model predictions can be informative (0.25)  **(n=20; 21%)**: This is a group of species with low to high number of observations (8-47) and high values for OR.  We believe that these models can ofe some relevant information to inform KBAs initiative. We expect that running the group of species with computer performance limitations (n=34; 35%) in a HPC will result in an increase of the percentage of informative models to 40-50%.  The reason: this group of species present huge number of observations. If true, we could expect at least 500 or so informative HSMs for the entire group of ~1,200 species.
 
