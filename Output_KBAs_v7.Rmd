@@ -1,0 +1,2728 @@
+---
+title: <center>"Screening potential areas for Key Biodiversity Areas (KBAs) in Canada. Species that might trigger A1 (threatened species) and B1 (geographic restricted species) criteria"</center>
+subtitle: "Species: **`r National_name`** (***`r namesp`***)"
+author: "Juan Zuloaga & Andrew Gonzalez, McGill University"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc_float:
+        collapsed: false
+    keep_md: true
+    css: mycss.css
+---
+
+
+
+```{r include=FALSE}
+############################################################################
+#                           KBAS Canada                                    #
+#                                                                          #
+#                  MODULE 1. SPECIES DISTRIBUTION MODELS                   #
+#                                                                          #
+#             Identifying suitable habitats for all species                #
+#                   that might trigger A1, B1 criteria                     #
+#                                                                          #
+#                           by Juan Zuloaga                                #
+#                Post-doctoral Researcher, McGill University               #
+#                         Andrew Gonzalez Lab                              #
+#                          October 2019  (R x64 3.6.1)                     #
+############################################################################ 
+
+```
+
+# {.tabset .tabset-pills}
+
+
+## POTENTIAL AREAS
+
+**a. Aim**
+
+This macro-analysis is aimed to screen potential suitable areas for **`r National_name`** (***`r namesp`***) that might harbor <a href="http://www.kbacanada.org/" target="_blank">Key Biodiversity Areas (KBAs)</a> in Canada. We evaluated habitat suitability models relating species presence-only data sets and predictor variables, using the  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">Maxent algorithm</a>  implemented in the  ENMeval v.2.0.0 package (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al 2021</a>) in R. This first approximation will be complemented with smaller-scale modelling approaches and experts site identification.
+
+
+**`r National_name`** (***`r namesp`***) is part of a preliminary list of Canadian species (~ 1000) that might potentially trigger A1 (threatened species) and/or B1 (geographic restricted species) criteria  (see <a href="https://portals.iucn.org/library/node/46259" target="_blank">KBA standard</a>).
+
+
+<br>
+
+
+
+**b. Model usefulness**
+
+We recommend users that before using outputs from the Habitat Suitability Model (HSM) consider this: Is the HSM potentially useful?
+
+There are multiple pieces of information that can be considered to evaluate model usefulness, including: the number of observations used in the model, model performance metrics (e.g., omission rate and AUC values), the spatial distribution of model uncertainty and the evaluation of empirical models against null models (i.e., comparing to the same performance metrics calculated on null models built with random data). 
+
+The table below is intended to guide users on model usefulness based on the minimum number of observations and model performance metrics. Model uncertainty and null models results are reported below.
+
+
+
++  Model predictions can be `r kableExtra::text_spec("informative", color="white", background = "darkgreen")`
+
++  There is `r kableExtra::text_spec("some concern", color="white", background = "orange")` in model predictions.
+
++  There is `r kableExtra::text_spec("high concern", color="white", background = "red")` in model predictions.
+
+
+<br>
+
+
+
+```{r echo=FALSE, warning=F,      fig.keep='first'}
+
+
+if(num_occs <= 14 && best_param$or.10p.avg <= 0.25 && best_param$auc.val.avg < 0.75){
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == "< 14",
+                                                                "red", "white"),
+                                              color = ifelse(Number_observations == "< 14", "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "<= 0.25",
+                                                                "green", "white"),
+                                              color = ifelse(Omission_rate == "<= 0.25", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+  
+}else if(num_occs <= 14 && best_param$or.10p.avg <= 0.25 && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == "<= 14",
+                                                                "red", "white"),
+                                              color = ifelse(Number_observations == "<= 14", "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "<= 0.25",
+                                                                "green", "white"),
+                                              color = ifelse(Omission_rate == "<= 0.25", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs <= 14 && best_param$or.10p.avg > 0.25 & best_param$or.10p.avg <= 0.50  && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == "<= 14",
+                                                                "red", "white"),
+                                              color = ifelse(Number_observations == "<= 14", "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "Between 0.25-0.50",
+                                                                "orange", "white"),
+                                              color = ifelse(Omission_rate == "Between 0.25-0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs <= 14 && best_param$or.10p.avg > 0.25 & best_param$or.10p.avg <= 0.50  && best_param$auc.val.avg < 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == "<= 14",
+                                                                "red", "white"),
+                                              color = ifelse(Number_observations == "<= 14", "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "Between 0.25-0.50",
+                                                                "orange", "white"),
+                                              color = ifelse(Omission_rate == "Between 0.25-0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs <= 14 && best_param$or.10p.avg > 0.50  && best_param$auc.val.avg < 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == "<= 14",
+                                                                "red", "white"),
+                                              color = ifelse(Number_observations == "<= 14", "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "> 0.50",
+                                                                "red", "white"),
+                                              color = ifelse(Omission_rate == "> 0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs <= 14 && best_param$or.10p.avg > 0.50  && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == "<= 14",
+                                                                "red", "white"),
+                                              color = ifelse(Number_observations == "<= 14", "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "> 0.50",
+                                                                "red", "white"),
+                                              color = ifelse(Omission_rate == "> 0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+  
+}else if(num_occs > 14 & num_occs <= 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg <= 0.25 && best_param$auc.val.avg < 0.75){
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))),
+                                                                "orange", "white"),
+                                              color = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "<= 0.25",
+                                                                "green", "white"),
+                                              color = ifelse(Omission_rate == "<= 0.25", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+  
+}else if(num_occs > 14 & num_occs <= 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg <= 0.25 && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))),
+                                                                "orange", "white"),
+                                              color = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "<= 0.25",
+                                                                "green", "white"),
+                                              color = ifelse(Omission_rate == "<= 0.25", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 14 & num_occs <= 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.25 & best_param$or.10p.avg <= 0.50  && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))),
+                                                                "orange", "white"),
+                                              color = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "Between 0.25-0.50",
+                                                                "orange", "white"),
+                                              color = ifelse(Omission_rate == "Between 0.25-0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 14 & num_occs <= 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.25 & best_param$or.10p.avg <= 0.50  && best_param$auc.val.avg < 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))),
+                                                                "orange", "white"),
+                                              color = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "Between 0.25-0.50",
+                                                                "orange", "white"),
+                                              color = ifelse(Omission_rate == "Between 0.25-0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 14 & num_occs <= 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.50  && best_param$auc.val.avg < 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))),
+                                                                "orange", "white"),
+                                              color = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "> 0.50",
+                                                                "red", "white"),
+                                              color = ifelse(Omission_rate == "> 0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 14 & num_occs <= 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.50  && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))),
+                                                                "orange", "white"),
+                                              color = ifelse(Number_observations == paste0("Between 15 ", "and ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "> 0.50",
+                                                                "red", "white"),
+                                              color = ifelse(Omission_rate == "> 0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg <= 0.25 && best_param$auc.val.avg < 0.75){
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))),
+                                                                "green", "white"),
+                                              color = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "<= 0.25",
+                                                                "green", "white"),
+                                              color = ifelse(Omission_rate == "<= 0.25", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+  
+}else if(num_occs > 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg <= 0.25 && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))),
+                                                                "green", "white"),
+                                              color = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "<= 0.25",
+                                                                "green", "white"),
+                                              color = ifelse(Omission_rate == "<= 0.25", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.25 & best_param$or.10p.avg <= 0.50  && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))),
+                                                                "green", "white"),
+                                              color = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "Between 0.25-0.50",
+                                                                "orange", "white"),
+                                              color = ifelse(Omission_rate == "Between 0.25-0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.25 & best_param$or.10p.avg <= 0.50  && best_param$auc.val.avg < 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))),
+                                                                "green", "white"),
+                                              color = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "Between 0.25-0.50",
+                                                                "orange", "white"),
+                                              color = ifelse(Omission_rate == "Between 0.25-0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.50  && best_param$auc.val.avg < 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))),
+                                                                "green", "white"),
+                                              color = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "> 0.50",
+                                                                "red", "white"),
+                                              color = ifelse(Omission_rate == "> 0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == "< 0.75",
+                                                                "red", "white"),
+                                              color = ifelse(AUC_values == "< 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+  
+}else if(num_occs > 10*length(names(cor_clim_top_green_s)) && best_param$or.10p.avg > 0.50  && best_param$auc.val.avg >= 0.75){
+  
+  Summary_performance[1:3,]%>%
+  mutate(
+ 
+ Number_observations = kableExtra::cell_spec(Number_observations, "html",
+                                              background = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))),
+                                                                "green", "white"),
+                                              color = ifelse(Number_observations == paste0("> ", 10*length(names(cor_clim_top_green_s))), "white", "black")),
+ 
+  Omission_rate = kableExtra::cell_spec(Omission_rate, "html",
+                                              background = ifelse(Omission_rate == "> 0.50",
+                                                                "red", "white"),
+                                              color = ifelse(Omission_rate == "> 0.50", "white", "black")),
+ 
+ AUC_values = kableExtra::cell_spec(AUC_values, "html",
+                                              background = ifelse(AUC_values == ">= 0.75",
+                                                                "green", "white"),
+                                              color = ifelse(AUC_values == ">= 0.75", "white", "black")) 
+ )%>%
+    
+ kable(Summary_performance, format="html", escape = F, align = "c")%>%
+     kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "80%", height = "170px")%>%
+  kableExtra::kable_styling(position = "center")
+}
+```
+  
+  
++ **Minimum number of observations**: for minimum number of observations we considered two values:
+
+  + Some studies have suggested that 14 is the minimum number of observations required for range restricted species <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.01509" target="_blank">(van Proosdij et al 2015)</a>.
+
+
+  + There is also a general rule of thumb that the minimum number of occurrences should be 10 times larger the number of variable predictors to reduce model overfitting (<a href="https://www.scinapse.io/papers/2108191500" target="_blank">Harrell et al 1996</a>). That is, number of observations = **`r num_occs`**; number of predictors = **`r length(names(cor_clim_top_green_s))`**; and, minimum number of observations required (10 x Predictors) = **`r 10*length(names(cor_clim_top_green_s))`**.
+
++ **Omission rate** indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): (0 - 0.25, the model can be informative; 0.25 - 0.50, there is some concern in model predictions; > 0.50 there is high concern in model predictions). Omission rate values(or.10p.avg) = **`r round(best_param$or.10p.avg, 2)`**
+
+
+
++ **AUC values** are "the probability that a random positive instance and a random negative instance are correctly ordered by the classifier." (<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). AUC values above 0.75 are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008)</a>.  AUC values(auc.val.avg) = **`r round(best_param$auc.val.avg,2)`** 
+
+<br>
+
+
+  
+**c. Interactive map**
+
+The interactive map below shows potential suitable areas for **`r National_name`** (***`r namesp`***). These polygons containing most of high suitable areas within the species geographic range. There is also a raster layer representing high suitable areas (values ranging from 0.75 to 1.), which can be used to pintpoint potential areas when polygons are too general.    
+
+
+<br>
+
+```{r echo=FALSE, warning=FALSE, out.width = "100%", fig.align="center" ,  fig.keep='all',message=FALSE,  error=FALSE}
+
+# LOADING A PROJECTING (GEOGRAPHIC) MAPS ------------
+
+    # Observations (points) Not included in the interactive map due to restrictions from data sets providers
+    obs_84 <- st_transform(st_as_sf(points_thin_aeac),CRS("+proj=longlat +datum=WGS84"))
+    obs_84_coord <- st_coordinates(obs_84)
+    
+    
+    # HSM map- best model (All-non collinear predictors)
+    if(exists("pred.seq")){
+    sp_legend_t <- projectRaster(pred.seq, crs="+proj=longlat +datum=WGS84", res=0.0083, method = 'ngb')
+    }
+    
+    # Habitat suitability >= 0.75 best model (All-non collinear predictors)
+    if(exists("pred.seq_aeac_75")){
+    sdm_mean_075_t <- projectRaster(pred.seq_aeac_75, crs="+proj=longlat +datum=WGS84", res=0.0083, method = 'ngb')
+    }
+    
+    #HS uncertainty - best model (All-non collinear predictors)
+    if(exists("uncertanty_aeac_stand")){
+    best_hsm_pred_scv_t <- projectRaster(uncertanty_aeac_stand, crs="+proj=longlat +datum=WGS84", res=0.0083, method = 'ngb')
+    }
+    
+    # HSM map- best climate model
+    if(exists("pred.seq_clim")){
+    pred.seq_clim_wgs84 <- projectRaster(pred.seq_clim, crs="+proj=longlat +datum=WGS84", res=0.0083, method = 'ngb')
+    }
+    
+    # Habitat suitability climate change (Scenario "RCP4.5")
+    if(exists("hsm_change")){
+    hsm_change_45 <- crop(hsm_change[[1]], Ecod_sp_join_id_diss_s)
+    }
+    
+    if(exists("hsm_change_45")){
+     hsm_change_45.min = cellStats(hsm_change_45$layer, "min")
+     hsm_change_45.max = cellStats(hsm_change_45$layer, "max")
+     hsm_change_45.scale <- ((hsm_change_45$layer - hsm_change_45.min) / (hsm_change_45.max - hsm_change_45.min) - 0.5 ) * 2
+    names(hsm_change_45.scale) <- "RCP4.5"
+    Suitable_area_climate_change_rt <- projectRaster(hsm_change_45.scale,crs="+proj=longlat +datum=WGS84", res=0.0083, method = 'ngb')
+    }
+       
+    # Top three Potential Areas
+    if(exists("K5_r_q75_pol_s_diss_m")){
+    eos_t <- st_transform(st_as_sf(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short]), crs="+proj=longlat +datum=WGS84")
+    }
+     
+    # All Potential Areas
+    if(exists("K5_r_q75_pol_s_diss_m")){
+    eos_t_all <- st_transform(st_as_sf(K5_r_q75_pol_s_diss_m), crs="+proj=longlat +datum=WGS84")
+    }
+
+ 
+# COLOR PALETTES -----------
+
+  # Habitat Suitability
+    pal = colorNumeric(palette = colorRamp(topo.colors(10, alpha=1, rev = T), bias = 1),
+                       domain = c(0,1), na.color = NA)
+  
+  
+  # Habitat_Suitability_Uncertainty
+       if(exists("best_hsm_pred_scv_t")){
+    pal2a = colorNumeric(palette = colorRamp(c("yellow",  "red", "blue"), bias = 1),
+                         domain = c(0, maxValue(best_hsm_pred_scv_t)), na.color = NA)
+       }
+      
+  # Climate_change_RCP4.5    
+    pal3 = colorNumeric(palette = colorRamp(c("red", "yellow", "blue"), bias = 1),
+                      domain = c(-1,1), na.color = NA)
+
+# ADDING MAPS -----------
+  
+  sdm_map=leaflet() %>%
+           setView(lng = -91, lat = 60, zoom = 3)%>%
+   
+  # Background World map
+    addProviderTiles("Esri.WorldImagery",'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}') %>%
+            #See more: http://leaflet-extras.github.io/leaflet-providers/preview/ 
+            #names(providers)
+            
+  # Canada + Provinces map
+     addPolygons(data=Canada_WGS84, weight=1,  color = "grey", group = "Canada", label=Canada_WGS84$juri_en) %>%
+  
+  # US States
+    addPolygons(data=US_states_wgs84, weight=1,  color = "grey", group = "US", label=US_states_wgs84$NAME) %>%
+    
+  # Ecoregions
+    addPolygons(data = Ecoregions, weight=1.3, fillColor = rainbow(50), color = "brown",
+                fillOpacity = 0.1, group = "Ecoregions", label = Ecoregions$ECO_NAME)   %>%
+
+  # Protected Areas
+    addPolygons(data = PA_ecod, weight=1.3, color = "#CCCC00", fillColor = "#CCCC00", fill=T,
+                group = "Protected_Areas", label = PA_ecod$NAME)   %>%
+  
+# ADDING TOOLS -------------
+    
+  # add a map scalebar
+    addScaleBar(position = 'bottomleft') %>%
+              
+  # add measurement tool
+    addMeasure(primaryLengthUnit = "kilometers",
+               secondaryLengthUnit = 'miles',
+               primaryAreaUnit = "hectares",
+               secondaryAreaUnit="acres",
+               position = 'topleft') %>%
+
+    
+# ADDING LEGENDS ------------ 
+  addLegend(pal = pal3,  values = values(Suitable_area_climate_change_rt),
+            labels = c("(-) 'Losing", "Stable", "(+) 'Gaining'"),
+            title = "HS_change_ClimateRCP4.5", position = "bottomright",
+            group = "HS_change_ClimateRCP4.5")
+  
+    # Habitat_Suitability  
+     if(exists("sp_legend_t")){
+               sdm_map = sdm_map  %>%
+                 addLegend(pal = pal, values = values(sp_legend_t),
+                 title = "Suitability",
+                 position = "bottomright",
+                 group = "Habitat_Suitability")
+               }
+  
+    # Habitat_Suitability_0.75_1.0  
+      if(exists("sdm_mean_075_t")){
+               sdm_map = sdm_map  %>%
+                 addLegend(pal = pal, values = values(sdm_mean_075_t),
+                           title = "Suitability",
+                           position = "bottomright",
+                           group = "Habitat_Suitability_0.75_1.0")
+     }
+                 
+    # Habitat_Suitability_Uncertainty  
+      if(exists("best_hsm_pred_scv_t")){
+               sdm_map = sdm_map  %>%
+                 addLegend(pal = pal2a,  values = values(best_hsm_pred_scv_t),
+                           title = "HS_Uncertainty",
+                           position = "bottomright",
+                           group = "Habitat_Suitability_Uncertainty")
+       
+    }
+  
+    # Habitat_Suitability_Bioclim  
+     if(exists("pred.seq_clim_wgs84")){
+               sdm_map = sdm_map  %>%
+                 addLegend(pal = pal, values = values(pred.seq_clim_wgs84),
+                           title = "Suitability",
+                           position = "bottomright",
+                           group = "Habitat_Suitability_Bioclim")
+               }     
+    
+# ADDING POLYGONS
+  
+  # Potential Areas top 3
+   if(exists("eos_t")){
+      sdm_map = sdm_map  %>%
+        addPolygons(data = eos_t,
+                    weight=2.8,
+                    fillColor = rev(rainbow(n=length(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short]))),
+                    color = rev(rainbow(n=length(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short]))),
+                    group = "Potential_Areas_top3",
+                    fillOpacity = 0.1,
+                    label =  "Potential_Areas_top3",
+                    labelOptions = labelOptions(noHide = F,
+                                                direction = "bottom",
+                                                style= list("font-style" = "italic", "font-size" = "14px"))
+        )
+     }
+   
+         
+                 
+                 
+   # Potential Areas - All
+    if(exists("eos_t_all")){
+       sdm_map = sdm_map  %>%
+          addPolygons(data = eos_t_all,
+                      weight=2.8,
+                      fillColor = '0',
+                      color = rev(rainbow(n=length(K5_r_q75_pol_s_diss_m))),
+                      group = "Potential_Areas_all",
+                      fillOpacity = 0.001,
+                      label =  "Potential_Areas_all",
+                      labelOptions = labelOptions(noHide = F,
+                                                  direction = "bottom",
+                                                  style= list("font-style" = "italic", "font-size" = "14px"))
+          )
+       }
+         
+                 
+   # Sites identified by experts
+    if(exists("kba_site_bottom_up_t")){
+       sdm_map = sdm_map  %>%
+         addPolygons(data = kba_site_bottom_up_t,
+                     weight=1.7,
+                     fillColor = '0',
+                     color = "yellow",
+                     fillOpacity = 0.001,
+                     group = "Sites_ID_Experts",
+                     label =  "Sites_ID_Experts",
+                     labelOptions = labelOptions(noHide = F,
+                                                 direction = "bottom",
+                                                 style= list("font-style" = "italic", "font-size" = "14px"))
+         )
+       }
+
+    # Towns
+        sdm_map = sdm_map  %>%
+          leafem::addFeatures(cities_ca_t_w,
+                              fillColor="black",
+                              fillOpacity = 0.5,
+                              weight=0.8,
+                              group= "Towns",
+                              radius=7,
+                              label =  cities_ca_t_w$GEONAME) 
+      
+      
+    # Observations
+        
+      # sdm_map = sdm_map  %>%
+        
+        # addCircleMarkers(obs_84_coord[,1],
+        #                 obs_84_coord[,2],
+        #                 fillColor="white",
+         #                fillOpacity = 0.8,
+         #                weight=0.2,
+          #               group= "Observations")
+        
+    # Geographic range (Ecoshapes)
+        sdm_map = sdm_map  %>%
+            addPolygons(data = st_transform(Ecod_sp_join_id_diss,
+                                            CRS("+proj=longlat +datum=WGS84")),
+                        weight=1.7,
+                        fillColor = '0', 
+                        color = "white",
+                        group = "Ecoshapes",
+                        fillOpacity = 0.001,
+                        label =  "Ecoshapes",
+                        labelOptions = labelOptions(noHide = F,
+                                                    direction = "bottom",
+                                                    style= list("font-style" = "italic","font-size" = "14px"))
+                        )
+            
+# ADDING RASTERS ----------
+            
+  # Habitat_Suitability
+    if(exists("sp_legend_t")){
+            sdm_map = sdm_map  %>%
+               addRasterImage(sp_legend_t, colors = pal, maxBytes = Inf,
+                              group= "Habitat_Suitability",
+                              opacity = 0.4,
+                              layerId = "Habitat_Suitability") %>%
+            leafem::addMouseCoordinates() %>%
+            leafem::addImageQuery(sp_legend_t,
+                                  type="mousemove",
+                                  layerId = "Habitat_Suitability",
+                                  digits = 2)
+            }
+        
+        
+  # Habitat_Suitability_0.75_1.0
+        if(exists("sdm_mean_075_t")){
+            sdm_map = sdm_map  %>%
+               addRasterImage(sdm_mean_075_t,
+                              colors = pal,
+                              group= "Habitat_Suitability_0.75_1.0",
+                              opacity = 0.4,
+                              layerId = "Habitat_Suitability_0.75_1.0") %>%
+            leafem::addMouseCoordinates() %>%
+            leafem::addImageQuery(sdm_mean_075_t,
+                                  type="mousemove",
+                                  layerId = "Habitat_Suitability_0.75_1.0",
+                                  digits = 2)
+            }
+         
+
+  # Habitat_Suitability_Uncertainty    
+        if(exists("best_hsm_pred_scv_t")){
+             sdm_map = sdm_map  %>%
+                addRasterImage(best_hsm_pred_scv_t,
+                               color= pal2a,
+                               group= "Habitat_Suitability_Uncertainty",
+                               opacity = 0.5) %>%
+                leafem::addMouseCoordinates() %>%
+                leafem::addImageQuery(best_hsm_pred_scv_t,
+                                      type="mousemove",
+                                      layerId = "Habitat_Suitability_Uncertainty",
+                                      digits = 2)
+             }
+            
+        
+   # Habitat_Suitability_Bioclim      
+          if(exists("pred.seq_clim_wgs84")){
+             sdm_map = sdm_map  %>%
+                addRasterImage(pred.seq_clim_wgs84,
+                               color= pal,
+                               group= "Habitat_Suitability_Bioclim",
+                               opacity = 0.5) %>%
+                leafem::addMouseCoordinates() %>%
+                leafem::addImageQuery(pred.seq_clim_wgs84,
+                                      type="mousemove",
+                                      layerId = "Habitat_Suitability_Bioclim",
+                                      digits = 2)
+            
+            
+                }
+        
+        
+        
+    # HS_change_ClimateRCP4.5 
+        if(exists("Suitable_area_climate_change_rt")){
+            sdm_map = sdm_map  %>%
+                # Climate_change (raster)
+                addRasterImage(Suitable_area_climate_change_rt,
+                               color= pal3,
+                               group= "HS_change_ClimateRCP4.5",
+                               opacity = 0.5) %>%
+                leafem::addMouseCoordinates() %>%
+                leafem::addImageQuery(Suitable_area_climate_change_rt,
+                                      type="mousemove",
+                                      layerId = "HS_change_ClimateRCP4.5",
+                                      digits = 2)
+            }
+            
+            
+        
+            
+# ADDING LayersControl --------------
+        sdm_map = sdm_map  %>%
+            addLayersControl(options = layersControlOptions(collapsed = T),
+                             position ="topleft",
+                             overlayGroups = c( "Ecoregions",
+                                                "Ecoshapes",
+                                                "Habitat_Suitability",
+                                                "Habitat_Suitability_0.75_1.0",
+                                                "Habitat_Suitability_Uncertainty",
+                                                "Habitat_Suitability_Bioclim",
+                                                "HS_change_ClimateRCP4.5",
+                                                "Potential_Areas_top3",
+                                                "Potential_Areas_all",
+                                                "Protected_Areas",
+                                                "Sites_ID_Experts",
+                                                "Towns",
+                                                "US"),
+                             baseGroups = c("Canada")) %>%
+          hideGroup(c("HS_change_ClimateRCP4.5",
+                      "Ecoregions",
+                      "Ecoshapes",
+                      "Habitat_Suitability",
+                      "Habitat_Suitability_0.75_1.0",
+                      "Habitat_Suitability_Uncertainty",
+                      "Habitat_Suitability_Bioclim",
+                      "Sites_ID_Experts",
+                      "Potential_Areas_all",
+                      "Protected_Areas",
+                      "Towns",
+                      "US")
+                    )
+
+# GENERATING INTERACTIVE MAP -------------
+        
+          sdm_map
+
+```
+
+<br>
+<div style="padding: 15px; border: 1px solid transparent; border-color: transparent; margin-bottom: 20px; border-radius: 4px; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6;">
+
+The spatial resolution of the analysis is ~1 km2 and all maps were projected to North America Albers Equal Area Conic to preserve the sense of area.
+
+Layers that can be activated are:
+
++ **'Ecoregions'** layer is based on the <a href="https://academic.oup.com/bioscience/article/67/6/534/3102935" target="_blank">Dinerstein et al., 2017</a>.
+
++ **'Ecoshapes'** layer in <span style="color:grey">grey</span> represents ecosystem-based automated range <a href="https://www.natureserve.org/natureserve-network/canada/biodiversity-data/ebar-range-mapping" target="_blank">(EBAR)</a> maps developed by NatureServe Canada to bound each HSM (see more information <a href="https://1drv.ms/b/s!Ajv6BHSXrqqqm4xipeEOQ67IfH77IQ?e=dqM1FO" target="_blank">here</a>). EBAR maps are comprised of jurisdiction approved Ecoshapes (generally Ecodistricts, Level IV Ecoregions, or similar) that are triggered by species observations. EBAR maps were also subject to a thorough process of review by experts on each of the species of interest
+
++ **'Habitat_Suitability'** layer represents Habitat Suitability Areas (HSA) for the best model. Where <span style="color:blue">blue</span> areas represent high suitable areas.
+
++ **'Habitat_Suitability_0.75_1.0'** layer represents values between 0.75-1.00 from HSA.
+
++ **'Habitat_Suitability_Uncertainty'** layer based on the coefficient of variation among 10 HSA maps generated in model fitting. Standardized  using maximum value in the area of study. High uncertainty in <span style="color:blue">blue</span>.
+
++ **'Habitat_Suitability_Bioclim'** layer represents the best climate model (i.e., only bioclim variables).  Where <span style="color:blue">blue</span> areas represent high suitable areas.
+
++ **'HS_change_ClimateRCP4.5'**. We calculated habitat suitability, comparing current 'Habitat_Suitability_Bioclim' with future scenarios of climate change (RCP4.5), using this formula:
+
+  + HSA change = current HSA - projected HSA. Where,
+
+    + negative (-) values represent ‘losing’ suitable areas in the future <span style="color:red">white-red</span>, while
+
+    + positive (+) values in <span style="color:blue">blue</span> indicate ‘gaining’ suitable areas in the future. Yellow color (zero values) indicates no change at all between current and projected suitable areas.
+
+
++ **'Potential_Areas_top3'** layer indicates the top three potential areas containing most of the high suitable areas (i.e., clusters of HSA = 0.75-1.00) within the species' geographic range ('Ecohapes' layer).
+
++ **'Potential_Areas_all'** layer contains all potential areas containing most of the high suitable areas (i.e., clusters of HSA = 0.75-1.00) within the species' geographic range (i.e., 'Ecohapes' layer).
+
+
++ **'Protected areas'** layer shows current protected areas from the <a href="https://www.protectedplanet.net/" target="_blank">World Protected Area Dataset</a>.
+
++ **'Sites ID_ Experts'** Potential sites for KBAs identified by experts (Bottom-up approach).
+
++ **'Towns'** layer displays main towns in the area of study.
+
++ **'US'** layer includes the administrative boundaries (States) in US.
+
+
+ </div>
+
+
+<br>
+**d. Habitat Suitability Areas (HSA)**
+
+
+**d1. HSA map**
+
+The map below shows habitat suitability areas for **`r National_name`** (***`r namesp`***), where high suitable areas are represented in <span style="color:blue">blue</span> (0.75-1.00).
+
+
+```{r  echo=FALSE, warning=F,   out.width = "130%",   fig.keep='first'}
+ 
+      if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+######### Predicted habitat suitability ###
+  
+
+brks <- seq(0, 1, by=0.25) 
+cols2<-c( "yellow", "orange", "green", "blue")
+
+# Habitat suitability model
+
+plot(pred.seq_aeac, col = cols2, breaks=brks, legend.args=list(text='Habitat \nsuitability', cex=0.7))
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss, by_feature = F), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+
+
+      }else{
+ 
+print("Unable to build Habitat Suitability Map")
+        
+}
+
+```
+<br>
+
+**d2. HSA within species geographic range (i.e., Ecoshapes)**
+
+The graph below shows suitable areas within the **species geographic range** (i.e., Ecoshapes): **Area = `r format(round(pred.seq_aeac_stats),big.mark=",")` Km2**
+
+
+<br>
+
+| SUITABILITY CATEGORY        | AREA (Km2)          | %  |
+| ------------- |-------------:| -----:|
+| High (0.75 - 1)      | **`r format(round(pred.seq_aeac_75_stats,0),big.mark=",")`**  | **`r round((pred.seq_aeac_75_stats/pred.seq_aeac_stats)*100, 2)`** |
+| Medium (0.56 - 0.75) | **`r format(round(pred.seq_aeac_50_stats,0),big.mark=",")`** | **`r round((pred.seq_aeac_50_stats/pred.seq_aeac_stats)*100, 2)`** |
+| Moderate (0.26 - 0.55) | **`r format(round(pred.seq_aeac_25_stats,0),big.mark=",")`** |   **`r round((pred.seq_aeac_25_stats/pred.seq_aeac_stats)*100, 2)`** |
+| Low (0 - 0.25) | **`r format(round(pred.seq_aeac_0_stats,0),big.mark=",")`** |    **`r round((pred.seq_aeac_0_stats/pred.seq_aeac_stats)*100, 2)`** |
+| | | |
+
+<br>
+
+```{r echo=FALSE, warning=F,    out.width = "130%", fig.keep='first'}
+      if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+
+# Stats
+ p<-ggplot(data=total_area, aes(x=bin, y=Area_Km2, fill=bin)) +
+
+  xlab("Habitat suitability") + ylab("Area (Km2)")+
+  geom_bar(stat="sum", show.legend = FALSE)+
+geom_text(aes(label = scales::percent(total_area$Area_Km2/pred.seq_aeac_stats), 
+                 y = total_area$Area_Km2),
+              position = position_dodge(width = 0.9),
+              vjust = 1.5)+
+  
+     scale_fill_manual(values=c("orange", "yellow", "green", "blue"))
+p 
+}
+
+```
+
+<a href="#top">Back to top</a>
+
+
+
+<br>
+
+**d3. Potential areas harboring most of HSAs**
+
+
+Potential areas are represented by polygons with various colors (usually 3 polygons containing most of HSAs).
+
+<br>
+
+```{r  echo=FALSE, warning=F,   out.width = "130%"}
+      if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+
+par(mar = c(2, 1, 1, 1))
+        if(exists("K5_r_q75_pol_s_diss_m")){
+  colo<- rev(rainbow(length(K5_r_q75_pol_s_diss_m)))
+        }else{
+          
+        }
+
+
+ # Habitat suitability model
+
+plot(pred.seq_aeac, col = cols2, breaks=brks, legend.args=list(text='Habitat \nsuitability', cex=0.7))
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss, by_feature = F), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+# EOs
+#plot(sp_eos_s, col = NA, border="black", add=TRUE)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+   
+
+# Polygons 5 Km
+if(exists("K5_r_q75_pol_s_diss_m")){
+
+  plot(st_geometry(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short]), lwd=2, border = colo[c(top_3_pol_s__range_short[1], top_3_pol_s__range_short[2], top_3_pol_s__range_short[3])], add=T)
+ 
+}else{
+  
+}
+  
+ 
+}
+
+```
+
+
+
+<br>
+
+
+**d4. HSA within potential areas (i.e., top three polygons)**
+
+
+The graph below shows **total area in Km2 (Y1 axis)** and **percentage (Y2 axis)** of high suitable areas (HSA = 0.75 to 1.00) within the **top three potential areas** containing most of the HSA (i.e., clusters of HSAs).
+
+Horizontal <span style="color:magenta">magenta</span> line represents the total area of high suitability (0.75-1.00) within the geographic range (see graph above).
+
+```{r echo=FALSE, warning=F,  out.width = "90%",fig.keep='first'}
+
+if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+
+# Percentage within range
+if(exists("top_3_pol_s")){
+# Plot
+  p <- ggplot(top_3_pol_s,  aes(x= forcats::fct_inorder(top_3_pol_s$range), y=top_3_pol_s$AreaKm2))+
+    
+  geom_bar(stat="identity", fill = rev(rainbow(n=length(top_3_pol_s$range))))+
+    scale_y_continuous(sec.axis = sec_axis(~(./h)*100, name = "Percentage"))+
+    
+    
+    xlab("Polygons containing most of the HSA") + ylab("Total area (Km2) of high suitability (0.75-1)")+
+   geom_hline(yintercept = total_area$Area_Km2[4], col="magenta", lwd=1.5)
+  p +
+  theme(axis.title.x = element_text(size=12, face="bold"),
+  axis.title.y = element_text(size=12, face="bold"),
+  axis.text.x = element_text(face="bold",  
+                             size=10, angle=25))
+  
+}else{
+   print("Unable to identify potential areas")
+  
+}
+
+}else{
+  
+          print("Unable to build Habitat suitability map and identify potential areas")
+
+}
+
+
+
+```
+
+<a href="#top">Back to top</a>
+
+
+
+<br>
+
+
+**e. Two more pieces for model evaluation**
+
+**e1. Uncertainty map**
+
+The map on the right shows a measurement of spatial uncertainty based on the coefficient of variation among 10 HSA maps generated for the best model.
+<br>
+
+```{r  echo=FALSE, warning=F,   out.width = "130%",   fig.keep='last'}
+      if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+
+######### Predited habitat suitability ###
+ par(mar = c(1, 1, 1, 1))
+
+
+# Two panels
+par(mfrow=c(1,2))
+
+
+brks <- seq(0, 1, by=0.25) 
+cols2<-c( "yellow", "orange", "green", "blue")
+
+# Habitat suitability model
+plot(pred.seq_aeac, col = cols2, breaks=brks, horizontal=T, legend.args=list(text='Habitat suitability', cex=0.6), axes=F)
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss, by_feature = F), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.3)
+# Observations 
+#plot(points_thin_aeac, col = "black", pch=3, add=TRUE)
+#legend("topright", legend="Observations", col="black", pch=3, bty="n",cex = 0.8)
+
+# Scale bar
+#scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+
+
+#Uncertainty
+
+plot(uncertanty_aeac, color=rev(heat.colors(10)), horizontal=T, legend.args=list(text='Uncertainty', cex=0.6), axes=F)
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss, by_feature = F), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.3)
+
+
+      }else{
+  
+        print("Unable to build Uncertainty map")
+}
+```
+
+
+
+
+
+<br>
+
+
+**e2. Null Models**
+
+We determined the significance and effect sizes of two performance metrics presented above (i.e., omission rates and AUCs), comparing to the same metrics calculated on null models built with random data (see <a href="https://www.jstor.org/stable/30244521" target="_blank">Raes & ter Steege (2007)</a>; <a href="https://onlinelibrary.wiley.com/doi/10.1111/jbi.13573" target="_blank">Bohl et al (2019)</a>; and  <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.04886" target="_blank">Kass et al (2019)</a> for more information). "If the metrics we calculated for our empirical model were not significantly different from those calculated for a series of null models, we would have not have high confidence that they meaningfully represent how well our empirical model performed." (see <a href="https://cran.rstudio.com/web/packages/ENMeval/vignettes/ENMeval-vignette.html#plot.preds" target="_blank">ENMeval Vignette </a>). 
+
+
+
+
+<br>
+
+
+```{r echo=FALSE, out.width = "130%", warning=F, message = FALSE}
+   
+   if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+#  code <-   evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram")
+
+  # an.error.occured <- FALSE
+#if(tryCatch( { result <- evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram"); print(res) }
+ #         , error = function(e) {an.error.occured <<- TRUE})){
+   
+     if(class(try(evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram"))) != "try-error"){
+       evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram")
+     }else{
+     
+ tryCatch(evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram"),
+ error = function(e) 
+print("unable to plot a graph: missing values"))
+     }
+
+
+  }
+
+
+
+```
+
+
+<a href="#top">Back to top</a>
+
+
+
+## SPECIES STATUS
+<br>
+**a. General information**
+
+ |SCIENTIFIC        | GLOB_ENGL_NAME       |    NATL_ENGL_NAME | GLOB_FRENCH_NAME|GLOB_SYNONYMS|
+| ----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |
+|*`r namesp`*      | `r global_name` |`r National_name` | `r global_name_fr`|*`r sp_global_synonyms`*      |
+|  | | | | |
+
+<br>
+
+**b. Is this species a Global and/or a National trigger for KBAs?** Yes (**Y**) or No (**N**)
+
+ |DESCRIPTION | GLOBAL |  NATIONAL |
+ |--- | --- | --- |
+ | KBA Trigger| `r Global_trigger` | `r National_trigger`  |
+ | | | |
+ 
+<br>
+
+**c. Status**
+ 
+ |DESCRIPTION | GLOBAL |  NATIONAL |
+  |--- | --- | --- |
+ |IUCN_Status | `r sp_table_IUCN` |  |
+ |KBA Criteria that may be triggered by this species | `r Global_A1`, `r Global_B1` | `r National_A1`, `r National_B1`| 
+ |COSEWIC_status |  | `r cosewic` |
+ |NatureServe_status | `r natureserveG` | `r natureserveN` |
+ |ELEMENT_GLOBAL_ID | `r as.character(element_id[1])` |  |
+ ||  |  |
+ 
+Note: A1 (threatened species) and B1 (geographic restricted species)
+ 
+<br>
+
+**d. NatureServe data sets:  Features (file numbers and IDs) and Ecoshapes**
+
+ |DESCRIPTION (Feature from NatureServe) | ID | 
+  |--- | --- |
+ |Species ID (EBAR-KBA/Restricted/FeatureServer/4)  | `r sp_id`|  
+  |datasetSource (EBAR-KBA/Restricted/FeatureServer/5)  | | 
+ |inputDataset (EBAR-KBA/Restricted/FeatureServer/7)  | | 
+ |Range Map ID (EBAR-KBA/Restricted/FeatureServer/10)  | `r rangemap_id` |  
+  |ecoshapeRangeMap (EBAR-KBA/EcoshapeRangeMap/FeatureServer/')  |  |  
+  |points (EBAR-KBA/Restricted/FeatureServer/0) |  |
+ |lines (EBAR-KBA/Restricted/FeatureServer/1) |  |
+  |polygons (EBAR-KBA/Restricted/FeatureServer/2) |  |
+  |EOs (EO_Polygons/FeatureServer/0 ) |  |
+ | |  |
+ 
+
+ <br>
+<a href="#top">Back to top</a>
+
+  <br>
+  
+## OBSERVATIONS
+
+**a. Type and number of features extracted from data sets**
+
+Data from NatureServe, date accessed: `r format(Sys.time(), '%B %d, %Y')`
+
+ |TYPE | NUMBER OF FEATURES | 
+  |--- | --- | 
+ |Points | `r   if(!exists("points_sel_shp")){
+                  0
+                  
+                }else{
+                  length(points_sel_shp)
+                  
+                }` | 
+ |Polygons (critical habitat) | `r if(!exists("polygons_sel_p_amax_j2_sel_p")){
+                  0
+                  
+                }else{
+                 length(polygons_sel_p_amax_j2_sel_p$geometry)}` | 
+ |Polygons (Element of occurrence) | `r if(!exists("eos_sel_shp")){
+                  0
+                  
+                }else{
+                  length(eos_sel_shp)
+                  
+                } `|
+ |Lines | `r if(!exists("lines_sel_shp")){
+                  0
+                  
+                }else{
+                   length(lines_sel_shp)
+                } ` |
+  | |  | 
+  
+Note: lines were converted to polygons using a 25m buffer.  All polygons were rasterized to 50m resolution (to capture small polygons) and then resampled to ~1000m to create one point per cell grid. See 'Methods' section.
+
+
+
+
+
+<br>
+
+ 
+ 
+ 
+**b. Number of observations**
+
++ The number of points after and removing overlapping points: **`r nrow(merged_points_duplicated_nona)`** 
+ 
++ Total number of points after spatial filtering (thinning distance = 5Km):  **`r nrow(number_of_points)`** 
+
++ Total number of points after removing points with NA values in any raster predictor: **`r num_occs_initial`** (the algorithm will remove these observations from model fitting).
+
++ Total number of points effectively used in model fitting: **`r num_occs`** (reported from the model)
+
+
+ <br>
+
+
+
+**c. Geographic range (EBARs) and occurrences density map**
+
+The maps below show the ecosystem-based automated range <a href="https://www.natureserve.org/natureserve-network/canada/biodiversity-data/ebar-range-mapping" target="_blank">(EBAR)</a> maps developed by NatureServe Canada to bound each HSM (see more information <a href="https://1drv.ms/b/s!Ajv6BHSXrqqqm4xipeEOQ67IfH77IQ?e=dqM1FO" target="_blank">here</a>). EBAR maps are comprised of jurisdiction approved Ecoshapes (generally Ecodistricts, Level IV Ecoregions, or similar) that are triggered by species observations. EBAR maps were also subject to a thorough process of review by experts on each of the species of interest. We also include the bias layer (when available), representing clusters of observations within the EBAR.  We used this layer to account for sampling bias in our models (see 'Habitat Suitability model' section for more details). Occurrences are not displayed in the map due to data providers restrictions. 
+<br>
+
+
+```{r  echo=FALSE, out.width = "130%",  fig.keep='first'}
+ par(mar = c(1, 1, 1, 1))
+
+# Three panels
+par(mfrow=c(1,2))
+
+plot(US_Canada_Mex_aeac,border="#999999")
+box()
+# Canada Provinces & Territories names
+Canada_cont_t_s_PROV <- c("AB", "BC", "MB", "NB", "NL", "NT", "", "NS", "NU", "ON", "PEI", "QC", "SK", "YT")
+rainbowcols <- rainbow(15,
+ s = 0.5)
+# Map of Canada
+plot(Canada_cont_prov[1],  col=adjustcolor(rainbowcols, 0.1), border="gray", add=T)
+text(Canada_cont_prov[1], labels=Canada_cont_t_s_PROV, cex=0.5)
+
+# Map of Ecodistricts
+plot(Ecod_sp_join_id_diss_s, col="magenta", border="magenta",  add= TRUE)
+
+
+# Density map
+
+if(exists("dens.ras_t3")){
+plot(dens.ras_t3, axes=F, legend.args=list(text='Density \nmap', cex=0.8))
+
+  # Canada
+ plot(Canada_cont_prov[1],   border="gray", add=T)
+text(Canada_cont_prov[1], labels=Canada_cont_t_s_PROV, cex=0.5)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+box()
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+ # Observations 
+#plot(points_thin_aeac, col = "red", pch=1, add=TRUE, cex=0.7)
+#legend("topright", legend="Observations", col="red", pch=1, bty="n",cex = 0.8)
+
+ }else{
+  plot(Ecod_sp_join_id_diss_s, col=NA, border="black", lwd=0.01)
+   legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+   box()
+
+}
+
+  # Observations 
+#plot(points_thin_sf_total_s, col = "red", pch=1, add=TRUE, cex=0.7)
+#legend("topright", legend="Observations", col="red", pch=1, bty="n",cex = 0.8)
+
+
+
+```
+
+
+
+
+
+
+<a href="#top">Back to top</a>
+
+ <br>
+
+
+## PREDICTORS
+
+**a. Overview**
+
+We searched for predictors that might be relevant for the presence and settlement of species in geographic space, including topographic heterogeneity, productivity, climate, and freshwater metrics. 
+
+<br>
+
+**b. Topographic heterogeneity**
+
+Topographic heterogeneity is the variability of elevation values within an area. We used multiple metrics of topographic heterogeneity developed by <a href="https://www.nature.com/articles/sdata201840" target="_blank">Amatulli et al 2018</a>. Access date (September 17, 20)  <a href="http://www.earthenv.org/topography" target="_blank">on this website</a>.  See 'Methods' section (1.2.2 Data/Predictors) in the main page for details.
+
+<br>
+
+**b.1 Vector Ruggedness Measure (VRM)**
+
+"Vector Ruggedness Measure (VRM) quantifies terrain ruggedness by measuring the dispersion of vectors orthogonal to the terrain surface. Slope and aspect are decomposed into 3-dimensional vector components (in the x, y, and z directions) using standard trigonometric operators, and by calculating the resultant vector magnitude within a user-specified moving window size (in this study 3 × 3)." <a href="https://www.nature.com/articles/sdata201840" target="_blank">(Amatulli et al 2018)</a>.
+
+
+```{r echo=FALSE, warning=FALSE,   out.width = "130%",   fig.keep='last'}
+
+# Vector Ruggedness Measure (VRM)
+
+
+plot(vrm_NA_aeac_ebar, col = rev(topo.colors(12)), legend.args=list(text='VRM', cex=0.7), cex.axis=0.8, main="Vector Ruggedness Measure (VRM)")
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+```
+
+
+**b.2 Roughness**
+
+"Roughness is expressed as the largest inter-cell difference of a focal cell and its 8 surrounding cells." <a href="https://www.nature.com/articles/sdata201840" target="_blank">(Amatulli et al 2018)</a>.
+
+```{r echo=FALSE, warning=FALSE,   out.width = "130%",   fig.keep='last'}
+
+# Topographic heterogeneity
+
+plot(roughness_NA_aeac_ebar, col = rev(terrain.colors(50)), legend.args=list(text='Roughness', cex=0.7), cex.axis=0.8, main="Roughness")
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+```
+<a href="#top">Back to top</a>
+
+
+**b.3 Slope**
+
+Slope aspect can significantly influence microclimate and hydrological process that might result in distinct vegetation types, species turnover and species habitats (<a href="https://www.nature.com/articles/s41598-020-73496-0" target="_blank">Yang et al 2020</a>).
+
+```{r echo=FALSE, warning=FALSE,   out.width = "130%",   fig.keep='last'}
+
+# Topographic heterogeneity
+
+plot(Slope_NA_aeac_ebar, col = rev(terrain.colors(50)), legend.args=list(text='Slope', cex=0.7), cex.axis=0.8, main="Slope")
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+```
+
+
+
+**b.4 Northness**
+
+Northness: "a northness value close to 1 corresponds to a northern exposition on a vertical slope (i.e., a slope exposed to very low amount of solar radiation), while a value close to -1 corresponds to a very steep southern slope, exposed to a high amount of solar radiation."
+
+```{r echo=FALSE, warning=FALSE,   out.width = "130%",   fig.keep='last'}
+
+# Topographic heterogeneity
+
+plot(Northness_NA_aeac_ebar, col = rev(topo.colors(50)), legend.args=list(text='Northness', cex=0.7), cex.axis=0.8, main="Northness")
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+```
+
+**b.5 Eastness**
+Eastness behaves similar to northess, except that values close to 1 represent east-facing slopes.
+
+```{r echo=FALSE, warning=FALSE,   out.width = "130%",   fig.keep='last'}
+
+# Topographic heterogeneity
+
+plot(Eastness_NA_aeac_ebar, col = rev(topo.colors(50)), legend.args=list(text='Northness', cex=0.7), cex.axis=0.8, main="Eastness")
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+```
+
+
+
+
+<a href="#top">Back to top</a>
+
+<br>
+
+**c. Dynamic Habitat Index (DHI)**
+
+We used three measures of vegetative productivity: annual cumulative productivity, minimum productivity throughout the year, and seasonality.
+
+<br>
+
+**c.1 Cumulative annual productivity (CAP)**
+
+Cummulative Annual productivity (or total greenness) integrates the productivity capacity of a landscape a year.
+<br>
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",   fig.keep='last'}
+
+plot(Band_1_aeac_r,legend.args=list(text='Total \ngreenness', cex=0.8), cex.axis=0.8, main="Cummulative Annual Productivity")
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+```
+<br>
+
+**c.2 Minimum annual productivity (MAP)**
+
+Minimum Annual productivity captures the lowest point in terms of productivity during the year.
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",   fig.keep='last'}
+
+plot(Band_2_aeac_r,legend.args=list(text='MAP', cex=0.8), cex.axis=0.8, main="Minimum Annual Productivity")
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+```
+
+<a href="#top">Back to top</a>
+
+
+<br>
+**c.3 Variation of annual productivity (VAP)**
+
+Variation of Annual productivity reflects how much productivity in a given pixel varies within a year.
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",   fig.keep='last'}
+
+plot(Band_3_aeac_r,legend.args=list(text='VAP', cex=0.8), cex.axis=0.8, main="Variation of Annual Productivity")
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+```
+
+**c.4 Dynamic habitat indices comparison**
+
+```{r echo=FALSE, warning=FALSE,   out.width = "130%"}
+
+# Three panels
+par(mfrow=c(1,3))
+plot(Band_1_aeac_r, Band_2_aeac_r)
+plot(Band_1_aeac_r, Band_3_aeac_r)
+plot(Band_2_aeac_r, Band_3_aeac_r)
+
+```
+
+
+<br>
+
+**d. Climatic variables**
+
+Data from <a href="https://www.worldclim.org/data/worldclim21.html" target="_blank">Worldclim</a> (19 bioclimatic variables, see <a href="https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/joc.1276" target="_blank">Hijmans et al 2005</a>)
+<br>
+
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",   fig.keep='last'}
+
+plot(bioclim_ecod_p_names, cex.main=0.8)
+
+```
+
+<a href="#top">Back to top</a>
+
+<br>
+
+**e. Water metrics**
+We recognized the importance of freshwater bodies for species presence, so we constructed two metrics using lakes from <a href="https://hydrosheds.org/page/hydrolakes" target="_blank">HydroLakes v1</a>.
+
+**e1. Distance to water**
+
+We calculated the distance from every single grid cell in the study region to the nearest grid cell representing a lake.
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",   fig.keep='last'}
+
+plot((lakesNA_1000m_c_dist/1000),legend.args=list(text='Distance (Km)', cex=0.8), cex.axis=0.8, main="Distance to water")
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+```
+
+**e2 Percentage of grid cells (0.01Km2) representing water bodies within each 1Km2 grid cell. **
+
+We calculated the percentage of grid cells (0.01Km2) that represent lakes within a 1Km2 grid cell.
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",   fig.keep='last'}
+
+plot(lakes_NA_100m_agg,legend.args=list(text='Percentage', cex=0.8), cex.axis=0.8, main="Percentage of lakes within 1Km2")
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", add=T, lwd=0.01)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+```
+
+
+
+<a href="#top">Back to top</a>
+
+<br>
+
+
+## HABITAT SUITABILITY MODEL
+
+**a. Evaluating multiple models**
+
+
+We used the ENMeval v.2.0.0 package <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">(Kass et al  2021</a> and see ENMeval Vignette <a href="https://jamiemkass.github.io/ENMeval/articles/ENMeval-2.0.0-vignette.html#null-models" target="_blank">here</a>) to evaluate a series of candidate models. The ENMeval package implements the MaxEnt algorithm. We evaluated various model settings, including multiple features classes (FCs; adding more FCs enables more complexity) and minimizing overfitting via regularization multipliers (RMs, that is penalizing "the inclusion of additional parameters that result in little or no ‘gain’ to the model")<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12261" target="_blank">(Muscarrella et al  2014)</a>). 
+
+
+<br>
+
+
+**b. Number of observations and model performance**
+
+Model building (e.g., type of features, partition method; see next section) and performance is mediated by the number of species' occurrences available. 
+
+Here, we allowed the algorithm to run the analysis and let users to make an educated decision about model usefulness based on different pieces of information: number of observations, omission rate values, AUC values, model uncertainty map, etc.
+
+There are some references that might help users comparing number of occurrences used in model fitting and minimum number of occurrences studies have recommended:
+
++ Total number of observations (points effectively used in model fitting):  **`r num_occs`**
+
++ Conservative use of predictions (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1472-4642.2008.00482.x" target="_blank">Wisz et al 2008</a>). Is the number of observations smaller than **30**?
+```{r  echo=FALSE, warning=FALSE, results='asis'}
+cat_color2 <- function(message, color = "black") cat(sprintf("<span style = \"color: %s;\">%s</span>\n\n", color, message))
+
+ if(num_occs <= 30){cat_color2("**YES, so there is concern in model predictions**", "red")}else{cat_color2("**NO; however, remember to review model performance metrics**", "green")} 
+
+```
+
+
++ Range-restricted species (<a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.01509" target="_blank">van Proosdij et al 2015</a>). Is the number of observations smaller than **14**?
+```{r  echo=FALSE, warning=FALSE, results='asis'}
+cat_color2 <- function(message, color = "black") cat(sprintf("<span style = \"color: %s;\">%s</span>\n\n", color, message))
+
+if(num_occs < 14){cat_color2("**YES, so there is concern in model predictions**", "red")}else{cat_color2("**NO; however, remember to review model performance metrics**", "green")} 
+```
+
++ Widespread-species (<a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.01509" target="_blank">van Proosdij et al 2015</a>).  Is the number of observations smaller than **25**?
+```{r  echo=FALSE, warning=FALSE, results='asis'}
+cat_color2 <- function(message, color = "black") cat(sprintf("<span style = \"color: %s;\">%s</span>\n\n", color, message))
+if(num_occs < 25){cat_color2("**YES, so there is concern in model predictions**", "red")}else{cat_color2("**NO; however, remember to review model performance metrics**", "green")}
+
+```
+  
++ Ratio observations:predictors (1:10); (<a href="https://www.scinapse.io/papers/2108191500" target="_blank">Harrel et al 1996</a>).  Is the number of observations smaller than **`r 10*length(names(cor_clim_top_green_s))`**?
+```{r  echo=FALSE, warning=FALSE, results='asis'}
+cat_color2 <- function(message, color = "black") cat(sprintf("<span style = \"color: %s;\">%s</span>\n\n", color, message))
+if(num_occs <  round(num_occs*length(names(cor_clim_top_green_s)), 2)){cat_color2("**YES, so there is concern in model predictions**", "red")}else{cat_color2("**NO; however, remember to review model performance metrics**", "green")}
+```
+
++ Empirical studies; Randal-NatureServe, personal communication. Is the number of observations smaller than **13**?
+```{r  echo=FALSE, warning=FALSE, results='asis'}
+cat_color2 <- function(message, color = "black") cat(sprintf("<span style = \"color: %s;\">%s</span>\n\n", color, message))
+if(num_occs < 13){cat_color2("**YES, so there is concern in model predictions**", "red")}else{cat_color2("**NO; however, remember to review model performance metrics**", "green")}  
+```
+
+ <br>
+
+**c.  Features:types and combinations**
+
+**Feature type**
+
+We included features types according to the number of occurrences  (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x" target="_blank">Merow et al  2013</a>), as follow:
+
+
+| Features_type (fc)  |Number of Observations required |
+|---|---|
+| None  | 1  | 
+| Linear(L)  |>2  | 
+| Quadratic(Q)   | >10|
+| Hinge(H)   | >15 |
+| Threshold(T)  |>80  |
+| Product(P)  |>80 | 
+|---|---|
+
+
+**Feature combinations (FCs)**
+
+Feature combinations are allowed in the model; however, the number of occurrences limit feature combination inclusion in the model.
+
+  + Less than 10 observations (L)
+  + 11 - 15 observations (L, Q, LQ)
+  + 16 - 80 observations (L, Q, LQ, H, QH)
+  + More than 80 observations (Q, H, LQ, LQP, QPT).*
+
+*Note that it is computationally prohibitive to include all potential FCs.
+
+Based on number of observations (**n = `r length(points_thin_sf_total[,1])`** ) we selected **features = `r features`** 
+
+ <br>
+
+**d. Regularization multiplier (rm).**
+
+The rm prevents model over-fitting (limiting	the	capacity	of	the	
+model	to	generalize	well	to	independent	data), making it more regular. Regularization penalizes a model’s maximum likelihood relative to the number of features in the model. We tested the following rms:
+
+  + 0.05
+  + 0.50
+  + 1.00 (Default in MaxEnt)
+  
+ <br>
+
+**e. Data partitioning method**  
+
+We used any of these two methods based on the number of onservations:
+
+  + get.randomkfold (more than 25 observations, kfolds = 10)
+  + get.jackknife (less than 25 observations)
+
+Based on number of observations (**n = `r length(points_thin_sf_total[,1])`** ) we selected **method = `r meth`**
+
+ <br>
+
+
+**f. The effect of number of background points and sampling bias**
+
+We evaluated the effect of using different numbers of background points and correcting for sampling bias, as follow:
+
++ Background points (bg).
+
+  + If number grid cells are smaller than 100,000 then we tested (20%, 40%, 60% of the grid cells as a background points).
+  + If number grid cells are greater than 100,000 then we tested (5%, 10%, 20% of the grid cells as a background points).*
+
+*Note that it is computationally prohibitive to include high number of background points.
+
+For this species the number of grid cells was: **`r format(georange_raster_number2, big.mark=",", scientific=F)`**, number of bg tested:
+
+  + bg = **`r format(background_points[1], big.mark=",", scientific=F)`**
+  + bg = **`r format(background_points[2], big.mark=",", scientific=F)`**
+  + bg = **`r format(background_points[3], big.mark=",", scientific=F)`**
+  
+
+<br>
+
+**g. Correcting for sampling bias.**
+
+Sampling bias is the result of different sampling efforts across environmental space, resulting in models predicting more sampling effort than habitat suitability areas for the species <a href="https://www.sciencedirect.com/science/article/pii/S1574954120300364" target="_blank">(Moua et al 2020)</a>. <a href="https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1890/07-2153.1" target="_blank">Phillips et al (2009)</a> proposed that choosing background data with the same bias as presence data can minimize sampling bias. Here we constructed a sampling bias layer using observation points (i.e., two-dimensional kernel density estimate, using the kde2d function from MASS package).
+
+  + No_minimizing_bias: the sampling area for 'Background points' included grid cells from the entire geographic range (EBARs).
+  + Minimizing_bias: the sampling area for 'Background points' included only grid cells weighted by the bias layer.
+  
+  <a href="#top">Back to top</a>
+
+  
+<br>
+
+**h. Model assessment**
+ 
+We implemented a sequential method to select the  best model using two performance metrics.  This approach uses cross-validation results by selecting models with the **lowest average test omission rate**, and to break ties, with the **highest average validation AUC** <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.04886" target="_blank">(Kass et al 2020 </a> and <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/jbi.12227" target="_blank">Radosavljevic & Anderson 2014)</a>.
+
++ **Omission rate** indicates the "fraction of all the pixels that are predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): (0 - 0.25, the model can be informative; 0.25 - 0.50, there is some concern in model predictions; > 0.50 there is high concern in model predictions).
+
+
++ **AUC values** are "the probability that a random positive instance and a random negative instance are correctly ordered by the classifier." (<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). AUC values above 0.75 are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008)</a>. 
+
+
+<br>
+
+**h1. Average test omission rate**
+
+
+The graph below compares the **average test omission rate** (y-axis) across multiple **regularization values** (rm, x-axis). Features (groups in colors) with NA values are not shown in the graph, see summarizing tables below for details).
+
++ Columns represent controlling for sampling bias
+  + Panels in first column = using bias layer
+  + Panels in second column = No_bias layer
+  
++ Rows represent testing various background points = 20%, 40% and 60% of grid cell from the geographic range
+
+<br>
+
+```{r echo=FALSE, warning=F,   fig.keep='last', fig.height=12, fig.width=12}
+#Features_RMs <- paste0(models_selection_best_6$features, "_", models_selection_best_6$rm)
+#par(mfrow=c(3,3))
+#if(!is.na(e.mx_nobias[[1]]@results$AICc) && !is.na(e.mx_bias[[1]]@results$AICc)){
+
+p1 <- ggplot(e.mx_bias[[1]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+    ylim(0,1)+
+  theme(axis.text = element_text(size=15))
+  #theme(legend.position="none")
+
+
+p2 <- ggplot(e.mx_bias[[2]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+
+p3 <- ggplot(e.mx_bias[[3]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p4 <- ggplot(e.mx_nobias[[1]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+
+p5 <- ggplot(e.mx_nobias[[2]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+
+p6 <- ggplot(e.mx_nobias[[3]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+legend <- get_legend(p1)
+p1 <- p1 + theme(legend.position="none")
+
+grid.arrange(gridExtra::arrangeGrob(p1, p2, p3),
+             gridExtra::arrangeGrob(p4, p5, p6),
+             legend,
+             heights=c(1.1, 0.1, 0.1),
+             nrow = 3, ncol=3)
+
+
+
+#}else{
+  
+ # print("Unable to plot graphs - AICcs = NA")
+#}
+
+```
+
+
+**h2. Average validation AUC**
+
+The graph below compares the **average validation AUC** (y-axis) across multiple **regularization values** (rm, x-axis). Features (groups in colors) with NA values are not shown in the graph, see summarizing tables below for details).
+
+Note that AUC values above 0.75 (blue dashed line) are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008)</a>.
+
+```{r echo=FALSE, warning=F,      fig.keep='last', fig.height=12, fig.width=12}
+#Features_RMs <- paste0(models_selection_best_6$features, "_", models_selection_best_6$rm)
+#par(mfrow=c(3,3))
+#if(!is.na(e.mx_nobias[[1]]@results$AICc) && !is.na(e.mx_bias[[1]]@results$AICc)){
+
+p1 <- ggplot(e.mx_bias[[1]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+   geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+    ylim(0,1)+
+    theme(axis.text = element_text(size=15))
+  #theme(legend.position="none")
+
+
+p2 <- ggplot(e.mx_bias[[2]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p3 <- ggplot(e.mx_bias[[3]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+    ylim(0,1)+
+    geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+p4 <- ggplot(e.mx_nobias[[1]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+    geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p5 <- ggplot(e.mx_nobias[[2]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+   geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p6 <- ggplot(e.mx_nobias[[3]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+   geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+legend <- get_legend(p1)
+p1 <- p1 + theme(legend.position="none")
+
+grid.arrange(gridExtra::arrangeGrob(p1, p2, p3),
+             gridExtra::arrangeGrob(p4, p5, p6),
+             legend,
+             heights=c(1.1, 0.1, 0.1),
+             nrow = 3, ncol=3)
+
+
+#}else{
+  
+ # print("Unable to plot graphs - AICcs = NA")
+#}
+
+```
+
+
+<a href="#top">Back to top</a>
+
+
+<br>
+
+**i. Best model**
+
+The table below presents a summary of model parameters for the best model.  We used this model for further analyses.
+
+<br>
+
+
+```{r echo=FALSE, warning=F,      fig.keep='first'}
+
+opt_param[1,]%>%
+  kable()%>%
+  kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "100%", height = "100px")
+
+```
+
+
+
+<br>
+
+
+**j. Multicollinearity**
+
+After removing collinear variables we retained **`r length(names(cor_clim_top_green_s))`** out of the 29 predictors (19 bioclim variables, 3 dynamic habitat metrics, 5 topographic heterogeneity metrics, 2 freshwater metrics) for model fitting.
+
+We used a correlation coefficient threshold of 0.7 (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2012.07348.x">Dormann et al 2012</a>) to select a set of uncorrelated variables, using <a href="http://127.0.0.1:19644/library/virtualspecies/html/removeCollinearity.html" target="_blank">removeCollinearity</a> fucntion from the <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01388" target="_blank">virtualspecies</a> package in R.
+
+
+
+```{r echo=FALSE, warning=FALSE, fig.keep='last',  fig.height=8, fig.width=15, message=FALSE, results='hide'}
+
+  par(mar = c(0, 1, 0, 1))
+
+#par(mar=c(4,1,10,10)) # increase y-axis margin.
+
+
+           cor_clim_top_green <- removeCollinearity(Env_lc,  multicollinearity.cutoff = 0.70, plot = TRUE, select.variables = T, sample.points = FALSE)
+
+
+
+```
+
+<br>
+
+
+
+**k. Variables importance**
+
+Variable importance (in percentage) for the best selected model.
+
+
+<br>
+
+```{r echo=FALSE, out.width = "130%", warning=F}
+      if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+
+ p1 <- ggplot(var_imp, aes(reorder(gsub(".permutation.importance","", var_imp$variable),
+                                      var_imp$permutation.importance), var_imp$permutation.importance)) + 
+      geom_col(position = "dodge") + labs(title="Variable Importance",
+                                          x ="Predictors", y = "Percentage") +
+      coord_flip()
+    p1
+
+      
+```
+
+
+
+<a href="#top">Back to top</a>
+
+<br>
+
+
+**l. Two more pieces for model assessment**
+
+**l1. Uncertainty map**
+
+The map on the right shows a measurement of spatial uncertainty based on the coefficient of variation among 10 HSA maps generated for the best model.
+<br>
+
+```{r  echo=FALSE, warning=F,   out.width = "130%",   fig.keep='last'}
+      if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+
+######### Predited habitat suitability ###
+ par(mar = c(1, 1, 1, 1))
+
+
+# Two panels
+par(mfrow=c(1,2))
+
+
+brks <- seq(0, 1, by=0.25) 
+cols2<-c( "yellow", "orange", "green", "blue")
+
+# Habitat suitability model
+plot(pred.seq_aeac, col = cols2, breaks=brks, horizontal=T, legend.args=list(text='Habitat suitability', cex=0.8), axes=F)
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss, by_feature = F), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.6)
+
+#Uncertainty
+
+plot(uncertanty_aeac, color=rev(heat.colors(10)), horizontal=T, legend.args=list(text='Uncertainty', cex=0.8), axes=F)
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss, by_feature = F), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.6)
+
+      }else{
+  
+        print("Unable to build Uncertainty map")
+}
+```
+
+
+
+
+
+<br>
+
+
+
+
+
+**l2. Null Models**
+
+We determined the significance and effect sizes of two performance metrics presented above (i.e., omission rates and AUCs), comparing to the same metrics calculated on null models built with random data (see <a href="https://www.jstor.org/stable/30244521" target="_blank">Raes & ter Steege (2007)</a>; <a href="https://onlinelibrary.wiley.com/doi/10.1111/jbi.13573" target="_blank">Bohl et al (2019)</a>; and  <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.04886" target="_blank">Kass et al (2019)</a> for more information). "If the metrics we calculated for our empirical model were not significantly different from those calculated for a series of null models, we would have not have high confidence that they meaningfully represent how well our empirical model performed." (see <a href="https://cran.rstudio.com/web/packages/ENMeval/vignettes/ENMeval-vignette.html#plot.preds" target="_blank">ENMeval Vignette </a>). 
+
+
+<br>
+
+
+```{r echo=FALSE, out.width = "130%", warning=F, message = FALSE}
+   
+   if(minValue(pred.seq_aeac) != maxValue(pred.seq_aeac)){
+# evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram")
+ 
+    if(class(try(evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram"))) != "try-error"){
+       evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram")
+     }else{
+     
+ tryCatch(evalplot.nulls(mod.null, stats = c("or.10p", "auc.val"), plot.type = "histogram"),
+ error = function(e) 
+print("unable to plot a graph: missing values"))
+     }
+
+   }
+
+
+```
+
+
+<a href="#top">Back to top</a>
+
+
+
+<br>
+
+## CLIMATE CHANGE
+
+
+We provide a rapid evaluation of the sensitivity of these potential areas to climate change. First we identified the best model using bioclim varibales. Then we used model parameters from the best bioclim model to predict habitat suitability for projected climate scenarios (RCP4.5 and RCP8.5). 
+
+ <br>
+
+**a. Current climate - Model evaluation**
+ 
+
+We implemented a sequential method to select the  best model using two performance metrics.  This approach uses cross-validation results by selecting models with the **lowest average test omission rate**, and to break ties, with the **highest average validation AUC** <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.04886" target="_blank">(Kass et al 2020 </a> and <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/jbi.12227" target="_blank">Radosavljevic & Anderson 2014)</a>.
+
++ **Omission rate** indicates the "fraction of all the pixels that are predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): (0 - 0.25, the model can be informative; 0.25 - 0.50, there is some concern in model predictions; > 0.50 there is high concern in model predictions).
+
+
++ **AUC values** are "the probability that a random positive instance and a random negative instance are correctly ordered by the classifier." (<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). AUC values above 0.75 are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008)</a>. 
+
+
+<br>
+**a1. Average test omission rate**
+
+
+The graph below compares the **average test omission rate** (y-axis) across multiple **regularization values** (rm, x-axis). Features (groups in colors) with NA values are not shown in the graph, see summarizing tables below for details).
+
++ Columns represent controlling for sampling bias
+  + Panels in first column = using bias layer
+  + Panels in second column = No_bias layer
+  
++ Rows represent testing various background points = 20%, 40% and 60% of grid cell from the geographic range
+
+<br>
+
+```{r echo=FALSE, warning=F,      fig.keep='last', fig.height=12, fig.width=12}
+
+p1 <- ggplot(e.mx_bias_clim_current[[1]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+    ylim(0,1)+
+  theme(axis.text = element_text(size=15))
+  #theme(legend.position="none")
+
+
+p2 <- ggplot(e.mx_bias_clim_current[[2]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+
+p3 <- ggplot(e.mx_bias_clim_current[[3]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p4 <- ggplot(e.mx_nobias_clim_current[[1]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+
+p5 <- ggplot(e.mx_nobias_clim_current[[2]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+
+p6 <- ggplot(e.mx_nobias_clim_current[[3]]@results, aes(x=rm, y=or.10p.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+legend <- get_legend(p1)
+p1 <- p1 + theme(legend.position="none")
+
+grid.arrange(gridExtra::arrangeGrob(p1, p2, p3),
+             gridExtra::arrangeGrob(p4, p5, p6),
+             legend,
+             heights=c(1.1, 0.1, 0.1),
+             nrow = 3, ncol=3)
+
+
+```
+
+
+
+<br>
+
+**a2. Average validation AUC**
+
+
+The graph below compares the **average validation AUC** (y-axis) across multiple **regularization values** (rm, x-axis). Features (groups in colors) with NA values are not shown in the graph, see summarizing tables below for details).
+
+Note that AUC values above 0.75 (blue dashed line) are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008)</a>.
+
+ <br>
+
+
+```{r echo=FALSE, warning=F,      fig.keep='last', fig.height=12, fig.width=12}
+
+p1 <- ggplot(e.mx_bias_clim_current[[1]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+   geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+    ylim(0,1)+
+    theme(axis.text = element_text(size=15))
+  #theme(legend.position="none")
+
+
+p2 <- ggplot(e.mx_bias_clim_current[[2]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+  geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p3 <- ggplot(e.mx_bias_clim_current[[3]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "Using bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+  geom_point()+
+    ylim(0,1)+
+    geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+p4 <- ggplot(e.mx_nobias_clim_current[[1]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 20% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+    geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p5 <- ggplot(e.mx_nobias_clim_current[[2]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 40% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+   geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+
+
+p6 <- ggplot(e.mx_nobias_clim_current[[3]]@results, aes(x=rm, y=auc.val.avg,   color=fc, group=fc))+
+   labs(title = "No_bias layer and bg = 60% grid cells") +
+    labs(color = "feature type (fc)")+
+    geom_line()+
+    geom_point()+
+    ylim(0,1)+
+   geom_hline(yintercept =  0.75, color="blue",linetype="longdash")+
+  theme(legend.position="none")+
+    theme(axis.text = element_text(size=15))
+
+legend <- get_legend(p1)
+p1 <- p1 + theme(legend.position="none")
+
+grid.arrange(gridExtra::arrangeGrob(p1, p2, p3),
+             gridExtra::arrangeGrob(p4, p5, p6),
+             legend,
+             heights=c(1.1, 0.1, 0.1),
+             nrow = 3, ncol=3)
+
+```
+
+
+
+
+
+
+**b. Best model parameters**
+the table below shows parameters for the best model. We used this model for further analyses to this model.
+
+
+```{r echo=FALSE, warning=F,      fig.keep='first'}
+
+opt.seq_clim[1,]%>%
+  kable()%>%
+  kableExtra::kable_paper("hover", full_width = F) %>%
+  kableExtra::scroll_box(width = "100%", height = "100px")
+
+```
+
+<br>
+
+**b2. Habitat Suitability Areas (HSA) and Uncertainty for best bioclim model**
+
+Habitat suitability areas for **`r global_name`** (***`r namesp`***) . High suitable areas in <span style="color:blue">blue</span> (0.75-1.00).
+
+The map on the right shows a measurement of uncertainty based on the coefficient of variation among 10 HSA maps generated in model fitting.
+
+
+
+<br>
+
+```{r  echo=FALSE, warning=F,   out.width = "130%",   fig.keep='last'}
+
+######### Predited habitat suitability ###
+ par(mar = c(1, 1, 1, 1))
+
+
+# Two panels
+par(mfrow=c(1,2))
+
+
+brks <- seq(0, 1, by=0.25) 
+cols2<-c( "yellow", "orange", "green", "blue")
+
+# Habitat suitability model
+plot(pred.seq_aeac_clim, col = cols2, breaks=brks, horizontal=T, legend.args=list(text='Habitat suitability', cex=0.8), axes=F)
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.6)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+
+
+#Uncertainty
+plot(uncertanty_aeac_clim_stand, color=rev(heat.colors(10)), horizontal=T, legend.args=list(text='Uncertainty', cex=0.8), axes=F)
+
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.6)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+
+
+```
+
+<a href="#top">Back to top</a>
+
+<br>
+
+
+**b3. Variables importance**
+Variable importance (in percentage) for the best selected model.
+<br>
+
+```{r echo=FALSE, out.width = "130%", warning=F}
+    #  if(minValue(sdm_pred_m) != maxValue(sdm_pred_m)){
+
+
+ p1 <- ggplot(var_imp_clim, aes(reorder(gsub(".permutation.importance","", var_imp_clim$variable),
+                                      var_imp_clim$permutation.importance), var_imp_clim$permutation.importance)) + 
+      geom_col(position = "dodge") + labs(title="Variable Importance",
+                                          x ="Predictors", y = "Percentage") +
+      coord_flip()
+    p1
+#p1 + scale_fill_discrete(name="Model")
+   #   }
+
+
+# barplot(df_aic.opt$permutation.importance, names.arg=df_aic.opt$variable, las=2, ylab="Permutation Importance")
+      
+```
+
+
+**c. Spatial distribution of suitable areas under current and projected climate scenarios**
+
+**c1. Major changes in suitable areas**
+
+We compared current climate HSMs with two projected climate HSMs scenarios:
+
++ RCP4.5: more or less stable throughout the century (radiative forcing is stabilised at approximately 4.5 W m-2)
++ RCP8.5: extreme scenario (radiative forcing reaches greater than 8.5 W m-2 by 2100 and continues to rise for some amount of time).
+
+<br>
+
+```{r echo=FALSE, warning=FALSE,  out.width = "130%",  message=FALSE, results='hide'}
+
+  par(mar = c(1, 1, 1, 1))
+
+# Three panels
+par(mfrow=c(1,3))    
+######### Predited habitat suitability FUTURE  ###
+  
+# Habitat suitability model
+ brks <- seq(0, 1, by=0.25) 
+cols2<-c( "yellow", "orange", "green", "blue")
+
+
+#Current
+plot(pred.seq_aeac_clim, col = cols2, breaks=brks,   horizontal=T, legend.args=list(text = 'Habitat suitability', cex=0.7), axes=F, main="Current")
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.9)
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=0.01, add=T)
+
+
+# 
+#CMIP5_predict_m <- mask(CMIP5_predict[[1]], Ecod_sp_join_id_diss_s)
+plot(crop(CMIP5_predict[[1]]$layer, bbox(Ecod_sp_join_id_diss_s)), col = cols2, breaks=brks,   horizontal=T, legend.args=list(text = 'Habitat suitability', cex=0.7), axes=F, main="RCP4.5")
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=1.5, add=T)
+
+
+#CMIP5_predict_m2 <- mask(CMIP5_predict[[2]], Ecod_sp_join_id_diss_s)
+plot(crop(CMIP5_predict[[2]]$layer, bbox(Ecod_sp_join_id_diss_s)), col = cols2, breaks=brks,   horizontal=T, legend.args=list(text = 'Habitat suitability', cex=0.7), axes=F, main="RCP8.5")
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=0.01, add=T)
+
+                
+```
+
+
+
+<br>
+
+
+
+**c2. Suitable areas plots: current vs. projected climate scenarios**
+
+```{r echo=FALSE, warning=FALSE, fig.keep='first', out.width = "130%",  message=FALSE, results='hide'}
+
+par(mfrow=c(1,3))    
+# 
+
+plot(pred.seq_aeac_clim, CMIP5_predict[[1]]$layer, xlim=c(0,1), ylim=c(0,1), xlab="Current", ylab="Projected-RCP4.5")
+plot(pred.seq_aeac_clim, CMIP5_predict[[2]]$layer, xlim=c(0,1), ylim=c(0,1), xlab="Current", ylab="Projected-RCP8.5")
+plot(CMIP5_predict[[1]]$layer,   CMIP5_predict[[2]], xlim=c(0,1), ylim=c(0,1), xlab="Projected-RCP4.5", ylab="Projected-RCP8.5")
+
+
+
+
+```
+
+
+<br>
+**d. Estimated change of HSA within potential sites**
+
+**d1. Maps**
+
+We calculated the spatial distribution of the major changes in HSAs within the geographic range of each species due to various scenarios of climate change, using this formula:
+
+HSA change = Projected HSA - Current HSA.
+
++ **'Losing (-)' suitable areas** in future scenarios are shown in <span style="color:red">red</span>, while 
+
++ **'gaining' (+) suitable areas** are shown in <span style="color:blue">blue</span>.
+
+
+
+Potential areas harboring most of current high suitable areas are show in colored polygons.
+
+```{r  echo=FALSE, warning=F,  fig.keep='last', out.width = "130%"}
+
+par(mar = c(1, 1, 1, 1))
+
+# Colors
+if(exists("K5_r_q75_pol_s_diss_m")){
+  colo<- rev(rainbow(length(K5_r_q75_pol_s_diss_m)))
+}
+  
+# Thre panels
+par(mfrow=c(1,2))
+######### Predited habitat suitability FUTURE  ###
+  
+#plot(hsm_change_45.scale, main="RCP4.5")
+# Ecodistricts          
+#plot(Ecod_sp_join_id_diss[1], col=NA, border="#999999", lwd=1.5, add=T)
+pal_change <- colorRampPalette(c("#FF0000", "#FFFFCC", "#99CCFF"), bias = 1)
+ brks2 <- seq(-1, 1, by=0.25) 
+
+
+plot(hsm_change_45,  main="RCP4.5",axes=F, breaks=brks2, box=T, col=pal_change(10))
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=1.5, add=T)
+
+
+
+# Polygons 5 Km
+if(exists("K5_r_q75_pol_s_diss_m")){
+  plot(st_geometry(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short]), lwd=1, border = colo[c(top_3_pol_s__range_short[1], top_3_pol_s__range_short[2], top_3_pol_s__range_short[3])], add=T)
+}
+
+
+hsm_change_85 <- hsm_change[[2]][[1]]
+
+plot(hsm_change_85, main="RCP8.5", legend=F,axes=F, box=T, breaks=brks2, col=pal_change(10))
+legend("bottomright", legend="EBARs - Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+# Ecodistricts          
+plot(st_union(Ecod_sp_join_id_diss), col=NA, border="black", lwd=1.5, add=T)
+
+
+
+# Polygons 5 Km
+if(exists("K5_r_q75_pol_s_diss_m")){
+  plot(st_geometry(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short]), lwd=1, border = colo[c(top_3_pol_s__range_short[1], top_3_pol_s__range_short[2], top_3_pol_s__range_short[3])], add=T)
+}
+
+
+```
+
+<br>
+
+**d2. Estimated change of HSA within potential areas: graphs**
+
+
+'Losing' suitable areas  in future scenarios are below 0 (-), while 'gaining' suitable areas are greater than 0 (+). Zero values indicates no change at all in suitable areas.
+
+```{r  echo=FALSE, warning=F,  fig.keep='last', out.width = "130%"}
+  #if(minValue(sdm_pred_m) != maxValue(sdm_pred_m)){
+
+par(mfrow=c(2,1))
+
+
+if(exists("K5_r_q75_pol_s_diss_m")){
+hsm_change_45_pol <- mask(hsm_change_45, as(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short], 'Spatial'))
+hist(hsm_change_45_pol, xlim=c(-1,1), xlab="", main="RCP4.5")
+abline(v=0, col="red", lty=2)
+
+hsm_change_85_pol <- mask(hsm_change_85, as(K5_r_q75_pol_s_diss_m[top_3_pol_s__range_short], 'Spatial'))
+hist(hsm_change_85_pol, xlim=c(-1,1), xlab= "Habitat suitability", main="RCP8.5")
+abline(v=0, col="red", lty=2)
+
+}else{
+  print("unable to calculate he spatial distribution of the major changes in HSAs within potential areas, because potential areas were not identified")
+}
+
+#}
+
+```
+
+<a href="#top">Back to top</a>
+
+
+
+
+<br>
+

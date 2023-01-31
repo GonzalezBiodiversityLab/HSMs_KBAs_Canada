@@ -1,0 +1,249 @@
+---
+title: <center>"Screening potential areas for Key Biodiversity Areas (KBAs) in Canada. Species that might trigger A1 (threatened species) and B1 (geographic restricted species) criteria"</center>
+subtitle: "Species: **`r National_name`** (***`r namesp`***)"
+author: "Juan Zuloaga & Andrew Gonzalez, McGill University"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc_float:
+        collapsed: false
+    keep_md: true
+    css: mycss.css
+---
+
+
+
+```{r include=FALSE}
+############################################################################
+#                           KBAS Canada                                    #
+#                                                                          #
+#                  MODULE 1. SPECIES DISTRIBUTION MODELS                   #
+#                                                                          #
+#             Identifying suitable habitats for all species                #
+#                   that migth trigger A1, B1 criteria                     #
+#                                                                          #
+#                           by Juan Zuloaga                                #
+#                Post-doctoral Researcher, McGill University               #
+#                         Andrew Gonzalez Lab                              #
+#                          October 2019  (R x64 3.6.1)                     #
+############################################################################ 
+
+```
+
+# {.tabset .tabset-pills}
+
+
+## POTENTIAL AREAS
+
+**a. Interactive map**
+
+
+<span style="color:red">Message for users</span>: Unable to run the analysis for  **`r National_name`** (***`r namesp`***). 
+
+
+```{r results='asis', echo = FALSE,   warning=FALSE}
+ 
+#AUC_best <- AUC_bestmod_full2[AUC_model_max,]$avg.test.AUC
+  
+
+cat_color <- function(message, color = "black") cat(sprintf("<span style = \"color: %s;\">%s</span>\n\n", color, message))
+
+
+  
+  cat_color("**Reason:**  Small number of observations (usually <= 2). See Observations section")
+  
+   
+```
+
+## SPECIES STATUS
+<br>
+**a. General information**
+
+ |SCIENTIFIC        | GLOB_ENGL_NAME       |    NATL_ENGL_NAME | GLOB_FRENCH_NAME|GLOB_SYNONYMS|
+| ----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |
+|*`r namesp`*      | `r global_name` |`r National_name` | `r global_name_fr`|*`r sp_global_synonyms`*      |
+|  | | | | |
+
+<br>
+
+**b. Is this species a Global and/or a National trigger for KBAs?** Yes (**Y**) or No (**N**)
+
+ |DESCRIPTION | GLOBAL |  NATIONAL |
+ |--- | --- | --- |
+ | KBA Trigger| `r Global_trigger` | `r National_trigger`  |
+ | | | |
+ 
+<br>
+
+**c. Status**
+ 
+ |DESCRIPTION | GLOBAL |  NATIONAL |
+  |--- | --- | --- |
+ |IUCN_Status | `r sp_table_IUCN` |  |
+ |KBA Criteria that may be triggered by this species | `r Global_A1`, `r Global_B1` | `r National_A1`, `r National_B1`| 
+ |COSEWIC_status |  | `r cosewic` |
+ |NatureServe_status | `r natureserveG` | `r natureserveN` |
+ |ELEMENT_GLOBAL_ID | `r as.character(element_id[1])` |  |
+ ||  |  |
+ 
+<br>
+
+**d. NatureServe data sets:  Features (file numbers and IDs) and Ecoshapes**
+
+ |DESCRIPTION (Feature from NatureServe) | ID | 
+  |--- | --- |
+ |Species ID (EBAR-KBA/Restricted/FeatureServer/4)  | `r sp_id`|  
+  |datasetSource (EBAR-KBA/Restricted/FeatureServer/5)  | | 
+ |inputDataset (EBAR-KBA/Restricted/FeatureServer/7)  | | 
+ |Range Map ID (EBAR-KBA/Restricted/FeatureServer/10)  | `r rangemap_id` |  
+  |ecoshapeRangeMap (EBAR-KBA/EcoshapeRangeMap/FeatureServer/')  |  |  
+  |points (EBAR-KBA/Restricted/FeatureServer/0) |  |
+ |lines (EBAR-KBA/Restricted/FeatureServer/1) |  |
+  |polygons (EBAR-KBA/Restricted/FeatureServer/2) |  |
+  |EOs (EO_Polygons/FeatureServer/0 ) |  |
+ | |  |
+ 
+
+ <br>
+<a href="#top">Back to top</a>
+
+  <br>
+  
+## OBSERVATIONS
+
+**a. Type and number of features and points created**
+
+Data from NatureServe, date accessed: `r format(Sys.time(), '%B %d, %Y')`
+
+ |TYPE | NUMBER OF FEATURES | 
+  |--- | --- | 
+ |Points | `r   if(!exists("points_sel_shp")){
+                  0
+                  
+                }else{
+                  length(points_sel_shp)
+                  
+                }` | 
+ |Polygons (critical habitat) | `r if(!exists("polygons_sel_p_amax_j2_sel_p")){
+                  0
+                  
+                }else{
+                 length(polygons_sel_p_amax_j2_sel_p$geometry)}` | 
+ |Polygons (Element of occurrence) | `r if(!exists("eos_sel_shp")){
+                  0
+                  
+                }else{
+                  length(eos_sel_shp)
+                  
+                } `|
+ |Lines | `r if(!exists("lines_sel_shp")){
+                  0
+                  
+                }else{
+                   length(lines_sel_shp)
+                } ` |
+  | |  | 
+  
+Note: lines were converted to polygons using a 25m buffer.  All polygons were rasterized to 50m resolution (to capture small polygons) and then resampled to ~1000m to create one point per cell grid. See 'Methods' section.
+
+
+
+
+<br>
+
+ 
+**b. Number of observations**
+
++ The number of points after and removing overlapping points: **`r if(!exists("merged_points_duplicated_nona")){
+0
+}else{
+nrow(merged_points_duplicated_nona) 
+}`**
+ 
++ Total number of points after spatial filtering (thinning distance = 5Km):  **`r if(!exists("number_of_points")){
+0
+}else{
+nrow(number_of_points) 
+}`**
+
+
+
++ Total number of points after removing points with NA values in any raster predictor: **`r if(!exists("num_occs_initial")){
+0
+}else{
+num_occs_initial 
+}`**.
+
+
+ <br>
+
+
+
+**c. Geographic range (EBARs) and ocurrences density map**
+
+
+The maps below show the ecosystem-based automated range <a href="https://www.natureserve.org/natureserve-network/canada/biodiversity-data/ebar-range-mapping" target="_blank">(EBAR)</a> maps developed by NatureServe Canada to bound each HSM (see more information <a href="https://1drv.ms/b/s!Ajv6BHSXrqqqm4xipeEOQ67IfH77IQ?e=dqM1FO" target="_blank">here</a>). EBAR maps are comprised of jurisdiction approved Ecoshapes (generally Ecodistricts, Level IV Ecoregions, or similar) that are triggered by species observations. EBAR maps were also subject to a thorough process of review by experts on each of the species of interest. We also include the bias layer (when available), representing clusters of observations within the EBAR.  We used this layer to account for sampling bias in our models (see 'Habitat Suitability model' section for more details). Occurrences are not displayed in the map due to data providers restrictions. 
+<br>
+
+
+```{r  echo=FALSE, out.width = "130%",  fig.keep='first'}
+ par(mar = c(1, 1, 1, 1))
+
+# Three panels
+par(mfrow=c(1,2))
+
+plot(US_Canada_Mex_aeac,border="#999999")
+box()
+# Canada Provinces & Territories names
+Canada_cont_t_s_PROV <- c("AB", "BC", "MB", "NB", "NL", "NT", "", "NS", "NU", "ON", "PEI", "QC", "SK", "YT")
+rainbowcols <- rainbow(15,
+ s = 0.5)
+# Map of Canada
+plot(Canada_cont_prov[1],  col=adjustcolor(rainbowcols, 0.1), border="gray", add=T)
+text(Canada_cont_prov[1], labels=Canada_cont_t_s_PROV, cex=0.5)
+
+# Map of Ecodistricts
+plot(Ecod_sp_join_id_diss_s, col="magenta", border="magenta",  add= TRUE)
+
+
+# Density map
+
+if(exists("dens.ras_t3")){
+plot(dens.ras_t3, axes=F, legend.args=list(text='Density \nmap', cex=0.8))
+
+  # Canada
+ plot(Canada_cont_prov[1],   border="gray", add=T)
+text(Canada_cont_prov[1], labels=Canada_cont_t_s_PROV, cex=0.5)
+
+# Scale bar
+scalebar(100000, type='bar', divs=1, below="Km", label = c(0,50, 100 ))
+box()
+
+
+# Ecodistricts
+plot(Ecod_sp_join_id_diss, col=NA, border="black", lwd=0.01, add=T)
+legend("bottomright", legend="Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+
+
+
+ }else{
+  plot(Ecod_sp_join_id_diss_s, col=NA, border="black", lwd=0.01)
+   legend("bottomright", legend="Geographic range", col="black", lty=1,bty="n",cex = 0.8)
+   box()
+
+}
+
+
+```
+
+
+
+
+
+
+<a href="#top">Back to top</a>
+
+ <br>
+
+
+
