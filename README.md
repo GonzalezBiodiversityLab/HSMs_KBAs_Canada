@@ -20,7 +20,7 @@ To do that, we first evaluated habitat suitability models relating species prese
 ## Structure of this report
 **Master document**: In this document you will find five sections:
 
-Please copy and paste this link in a new window https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html
+Please copy and paste this link in a new window `https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html`
 
 - Overview
 - Workflow
