@@ -39,10 +39,9 @@ We used  R (x64 3.6.1) and several packages described in the methods section in 
 We also used ArcGis Pro (using an R package) to connect with NatureServe Canada database and retrieve data for the analysis.
 
 ## Results/recomendations
-The figure below summarizes to main groups of species after running HSMs: unable to run HSMs and species with HSMs predictios:
+The figure below summarizes the resultg of running HSMs for 96 species. 
 
 ![](./summary_HSMs_KBAs.png)
-
 
 **1. Unable to run HSMs**
 
