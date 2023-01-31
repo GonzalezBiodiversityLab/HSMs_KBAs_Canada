@@ -96,7 +96,7 @@ dir.create("./HSMs_html_outputs/", showWarnings=F)
 dir.create("./Intermediate/Points_thinned_all_wgs84/", showWarnings=F)
 dir.create("./Intermediate/Points_thinned_EBARs_aeac/", showWarnings=F)
 dir.create("./Intermediate/hsm_map_best_all/", showWarnings=F)
-dir.create("./Intermediate/hsm_map_uncertanty_all/", showWarnings=F)
+dir.create("./Intermediate/hsm_map_uncertainty_all/", showWarnings=F)
 dir.create("./Intermediate/sdm_polygons_KBAs_Top3/", showWarnings=F)
 dir.create("./Intermediate/hsm_summary_performance/", showWarnings=F)
 dir.create("./Intermediate/hsm_map_future/", showWarnings=F)
@@ -1341,11 +1341,11 @@ print("Loading point features")
     uncertanty_aeac_stand <- uncertanty_aeac/maxValue(uncertanty_aeac)
 
     
-    if(dir.exists(paste0("./Intermediate/hsm_map_uncertanty_all/", sp_eos$GLOBAL_SCIENTIFIC_NAME[i]))){
+    if(dir.exists(paste0("./Intermediate/hsm_map_uncertainty_all/", sp_eos$GLOBAL_SCIENTIFIC_NAME[i]))){
     }else{
-      dir.create(paste0("./Intermediate/hsm_map_uncertanty_all/", sp_eos$GLOBAL_SCIENTIFIC_NAME[i]))}
+      dir.create(paste0("./Intermediate/hsm_map_uncertainty_all/", sp_eos$GLOBAL_SCIENTIFIC_NAME[i]))}
     
-    writeRaster(uncertanty_aeac_stand, paste0("./Intermediate/hsm_map_uncertanty_all/",
+    writeRaster(uncertanty_aeac_stand, paste0("./Intermediate/hsm_map_uncertainty_all/",
                                       sp_eos$GLOBAL_SCIENTIFIC_NAME[i], "/",
                                       "Uncertanty_all_",
                                       sp_eos$GLOBAL_SCIENTIFIC_NAME[i], ".tif"),
