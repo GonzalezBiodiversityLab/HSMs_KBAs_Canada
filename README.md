@@ -68,3 +68,21 @@ Omission rate (OR) indicates the "fraction of the test localities that fall into
 
 +  **Model predictions can be informative (0.25; n=20; 21%)**: This is a group of species with low to high number of observations (8-47) and high values for OR.  We believe that these models can ofe some relevant information to inform KBAs initiative. We expect that running the group of species with computer performance limitations (n=34; 35%) in a HPC will result in an increase of the percentage of informative models to 40-50%.  The reason: this group of species present huge number of observations. If true, we could expect at least 500 or so informative HSMs for the entire group of ~1,200 species.
 
+## Collaborators
+Datasets:
++ Chloé Debyser (KBA Canada Technical Coordinator)
++ Randal Green (NatureServe Canada, Technical Coordinator, EBAR Project)
++ Christine Terwissen (NatureServe Canada, National Coordinator, EBAR Project)
+
+HSMs reviewrs:
++ Maria Leung (Yukon species expert)
++ Richard Schuster (Carleton University)
++ Jacqueline Clare (BC Conservation Data Centre)
++ Varina Crisfield (Sherbrook University)
++ Guillaume Blanchet (Sherbrook University)
++ Dave Fraser 
+
+Software troubleshooting:
++ Guillaume Larocque (McGill University)
++ Val Lucet (McGill University)
++ Gonzalo Pinilla (CUNY)
