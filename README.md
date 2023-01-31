@@ -2,8 +2,8 @@
 
 ## Planning/developing team
 + Juan Zuloaga (McGill University)
-+ Andrew Gonzalez (McGill University)
-+ Ciara Raudsepp_Hearne (WCS-KBA Canada coordinator)
++ Prof. Andrew Gonzalez (McGill University)
++ Ciara Raudsepp Hearne (WCS-KBA Canada coordinator)
 
 ## Overview
 Screening potential areas for <a href="http://www.kbacanada.org/" target="_blank">Key Biodiversity Areas (KBAs) in Canada</a>, using Habitat Suitability Models (HSMs) for species that might trigger A1 (threatened species) and B1 (geographic restricted species) KBA criteria  (see <a href="https://portals.iucn.org/library/node/46259" target="_blank">KBA standard</a>)
@@ -34,7 +34,7 @@ The Markdown files to create the html **species' reports** are:
 - `Output_KBAs_v7.Rmd`: it generates a html full report for species with model predictions.
 
 ## Data
-In this link (data_inputs) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
+In this link (data_inputs) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. If you want to download the zipped file setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
 - Species: WCS-KBAs provided an Excel table with a set of potential species for analysis.
 - Observations: we were granted access to the NatureServe Canada datasets via ArcGIS Pro.
 
@@ -43,7 +43,7 @@ We used  R (x64 3.6.1) and several packages described in the methods section in 
 We also used ArcGis Pro (using an R package) to connect with NatureServe Canada database and retrieve data for the analysis.
 
 ## Results/recomendations
-The figure below summarizes results obtained after running HSMs for 96 species. Intermediate results (maps, tables, etc) for each species can be accessed here.
+The figure below summarizes results obtained after running HSMs for 96 species. 
 
 ![](./summary_HSMs_KBAs.png)
 
@@ -61,6 +61,7 @@ There is a group of species where we were unable to run run HSMs.  We identified
 **2. Species with HSMs predictions**
 
 For this group of species we were able to run HSMs and classified them based on one of the model performance metric "Omission rate (OR)", as follow:
+Note: Intermediate results (maps, tables, etc) for each species can be accessed here.
 
 Omission rate (OR) indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): 
 
@@ -87,7 +88,7 @@ HSMs reviewrs:
 + Guillaume Blanchet (Sherbrook University)
 + Dave Fraser 
 
-Software troubleshooting:
+Coding troubleshooting:
 + Guillaume Larocque (McGill University)
 + Val Lucet (McGill University)
-+ Gonzalo Pinilla (CUNY)
++ Gonzalo Pinilla for ENMeval package (CUNY)
