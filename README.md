@@ -14,7 +14,7 @@ Screening potential areas for <a href="http://www.kbacanada.org/" target="_blank
 - We ran the analysis for a group of 96 species as a proof of concept aimed to provide recommendations for full implementation (~ 1,200 species). 
 
 ## General methods
-To do that, we first evaluated habitat suitability models relating species presence-only data sets and predictor variables, using the  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">Maxent algorithm</a> implemented in the  ENMeval v.2.0.0 package in R (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al 2021</a>). Then, we used cluster analysis to identify discrete polygons containing most of the high suitable areas.
+We first evaluated habitat suitability models relating species presence-only data sets and predictor variables, using the  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">Maxent algorithm</a> implemented in the  ENMeval v.2.0.0 package in R (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al 2021</a>). Then, we used cluster analysis to identify discrete polygons containing most of the high suitable areas.
 
 ## Structure of this report
 <a href="[http://www.kbacanada.org/](https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html)" target="_blank">Master document</a>: In this document you will find five sections
@@ -25,8 +25,7 @@ To do that, we first evaluated habitat suitability models relating species prese
 - **Species reports**: it contains a link to a new html file showing results for every single species included in the analysis. This link is well supported with interactive maps, statistics, figures and tables.  
 
 ## Scripts
-
-The main R script is named `KBAsCan_Topdown_v10.R`.  It fully implements the full set of analsysis for any species in Canada. It requerires some addtional work to summarize serveral lines into more practical and elegant functions.
+The main R script is named `KBAsCan_Topdown_v10.R`.  It fully implements the analsysis for any species in Canada. It requerires some addtional work to summarize serveral lines into more practical and elegant functions.
 
 The Markdown file `MacroKBAs_Sites_v4.Rmd` generates a .html file to visualize the master document.
 
@@ -36,15 +35,16 @@ The Markdown files to create the html **species' reports** are:
 - Note: link for each species were manually manually to the master document.
 
 ## Data
+In this link (data_inputs) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. setwd("C:/HSMs_KBAsCan") in your PC and unzziped the file to create a`data_input` folder.
+- Species: WCS-KBAs provided an Excel table with a set of potential species for analysis (it is important to use same colomns names).
 - Observations: we were granted access to the NatureServe Canada datasets.
-- Enviromental layers: we provide a zip file with all layers (raster and shapefiles)
 
 ## Software
 We used  R (x64 3.6.1) and several packages described in the methods section in the master document.
 We also used ArcGis Pro (using an R package) to connect with NatureServe Canada database and retrieve data for the analysis.
 
 ## Results/recomendations
-The figure below summarizes the resultg of running HSMs for 96 species. 
+The figure below summarizes the resultg of running HSMs for 96 species. Intermediate results (maps, tables, etc) for each species can be accessed here.
 
 ![](./summary_HSMs_KBAs.png)
 
