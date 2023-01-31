@@ -41,7 +41,7 @@ We also used ArcGis Pro (using an R package) to connect with NatureServe Canada 
 ## Results/recomendations
 The figure below summarizes to main groups of species after running HSMs: unable to run HSMs and species with HSMs predictios:
 
-![](./HSMs_html_outputs/Figures_Macro_doc/summary_HSMs_KBAs.png)
+![](./summary_HSMs_KBAs.png)
 
 
 **1. Unable to run HSMs**
