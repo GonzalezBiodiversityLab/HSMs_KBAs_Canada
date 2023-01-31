@@ -101,8 +101,6 @@ dir.create("./Intermediate/sdm_polygons_KBAs_Top3/", showWarnings=F)
 dir.create("./Intermediate/hsm_summary_performance/", showWarnings=F)
 dir.create("./Intermediate/hsm_map_future/", showWarnings=F)
 dir.create("./Intermediate/hsm_novel_climate/", showWarnings=F)
-dir.create ("./Intermediate/hsm_polygons_KBAs/", showWarnings=F)
-dir.create ("./Intermediate/hsm_polygons_KBAs_Top3/", showWarnings=F)
 dir.create ("./Intermediate/hsm_polygons_area/", showWarnings=F)
 dir.create ("./Intermediate/hsm_hfp_area/", showWarnings=F)
 
