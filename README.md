@@ -1,5 +1,11 @@
 # Habitat suitability model to identify potential areas for Key Biodiversity Areas (KBAs) in Canada
-## OVERVIEW
+
+## Planning/developing team
++ Juan Zuloaga (McGill University)
++ Andrew Gonzalez (McGill University)
++ Ciara Raudsepp_Hearne (KBA Canada coordinator)
+
+## Overview
 Screening potential areas for <a href="http://www.kbacanada.org/" target="_blank">Key Biodiversity Areas (KBAs) in Canada</a>, using Habitat Suitability Models (HSMs) for species that might trigger A1 (threatened species) and B1 (geographic restricted species) KBA criteria  (see  and <a href="https://portals.iucn.org/library/node/46259" target="_blank">KBA standard</a>).
 
 
@@ -69,6 +75,7 @@ Omission rate (OR) indicates the "fraction of the test localities that fall into
 +  **Model predictions can be informative (0.25; n=20; 21%)**: This is a group of species with low to high number of observations (8-47) and high values for OR.  We believe that these models can ofe some relevant information to inform KBAs initiative. We expect that running the group of species with computer performance limitations (n=34; 35%) in a HPC will result in an increase of the percentage of informative models to 40-50%.  The reason: this group of species present huge number of observations. If true, we could expect at least 500 or so informative HSMs for the entire group of ~1,200 species.
 
 ## Collaborators
+
 Datasets:
 + Chloé Debyser (KBA Canada Technical Coordinator)
 + Randal Green (NatureServe Canada, Technical Coordinator, EBAR Project)
