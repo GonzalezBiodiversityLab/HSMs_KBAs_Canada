@@ -20,31 +20,30 @@ We first evaluated habitat suitability models relating species presence-only dat
 <a href="[http://www.kbacanada.org/](https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html)" target="_blank">Master document</a>: In this document you will find five sections
 - Overview
 - Workflow
-- Results (sumamrize below)
-- Methods: we provide full description of the methods and links to papers and websites tha can help future users to implement and move forward this initiative. 
+- Results (summarized below)
+- Methods: we provide full description of the methods along with links to papers and websites tha can help future users to implement HSMs.
 - **Species reports**: it contains a link to a new html file showing results for every single species included in the analysis. This link is well supported with interactive maps, statistics, figures and tables.  
 
 ## Scripts
-The main R script is named `KBAsCan_Topdown_v10.R`.  It fully implements the analsysis for any species in Canada. It requerires some addtional work to summarize serveral lines into more practical and elegant functions.
+The main R script is named `KBAsCan_Topdown_v10.R`.  It fully implements the analsysis for any species in Canada. Note that these scripts requiere some addtional work to summarize serveral lines into more practical and elegant functions.
 
 The Markdown file `MacroKBAs_Sites_v4.Rmd` generates a .html file to visualize the master document.
 
 The Markdown files to create the html **species' reports** are:
-- `Output_KBAs_v7_empty_v2.Rmd`: it generates a html for those species where is imposible to run HSMs. We specified the reasons (e.g., not enough observations).
+- `Output_KBAs_v7_empty_v2.Rmd`: it generates a html for those species where is imposible to run HSMs (we specified the reasons e.g., not enough observations).
 - `Output_KBAs_v7.Rmd`: it generates a html full report for species with model predictions.
-- Note: link for each species were manually manually to the master document.
 
 ## Data
-In this link (data_inputs) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. setwd("C:/HSMs_KBAsCan") in your PC and unzziped the file to create a`data_input` folder.
-- Species: WCS-KBAs provided an Excel table with a set of potential species for analysis (it is important to use same colomns names).
-- Observations: we were granted access to the NatureServe Canada datasets.
+In this link (data_inputs) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
+- Species: WCS-KBAs provided an Excel table with a set of potential species for analysis.
+- Observations: we were granted access to the NatureServe Canada datasets via ArcGIS Pro.
 
 ## Software
 We used  R (x64 3.6.1) and several packages described in the methods section in the master document.
 We also used ArcGis Pro (using an R package) to connect with NatureServe Canada database and retrieve data for the analysis.
 
 ## Results/recomendations
-The figure below summarizes the resultg of running HSMs for 96 species. Intermediate results (maps, tables, etc) for each species can be accessed here.
+The figure below summarizes results obtained after running HSMs for 96 species. Intermediate results (maps, tables, etc) for each species can be accessed here.
 
 ![](./summary_HSMs_KBAs.png)
 
