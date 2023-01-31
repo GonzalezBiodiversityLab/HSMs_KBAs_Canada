@@ -18,8 +18,10 @@ Screening potential areas for <a href="http://www.kbacanada.org/" target="_blank
 To do that, we first evaluated habitat suitability models relating species presence-only data sets and predictor variables, using the  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">Maxent algorithm</a>  implemented in the  ENMeval v.2.0.0 package (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al 2021</a>) in R. Then, we used cluster analysis to identify discrete polygons containing most of the high suitable areas.
 
 ## Structure of this report
-**Master document**: copy and paste this link in a new window https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html
-In this document you will find five sections:
+**Master document**: In this document you will find five sections:
+
+Please copy and paste this link in a new window https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html
+
 - Overview
 - Workflow
 - Results (sumamrize below)
@@ -28,13 +30,13 @@ In this document you will find five sections:
 
 ## Scripts
 
-The main R script is named KBAsCan_Topdown_v10.R.  It fully implements the full set of analsysis for any species in Canada. It requerires some addtional work to summarize serveral lines into more practical and elegant functions.
+The main R script is named `KBAsCan_Topdown_v10.R`.  It fully implements the full set of analsysis for any species in Canada. It requerires some addtional work to summarize serveral lines into more practical and elegant functions.
 
-The Markdown file MacroKBAs_Sites_v4.Rmd generates a .html file to visualize the master document.
+The Markdown file `MacroKBAs_Sites_v4.Rmd` generates a .html file to visualize the master document.
 
 The Markdown files to create the html **species' reports** are:
-- Output_KBAs_v7_empty_v2.Rmd: it generates a html for those species where is imposible to run HSMs. We specified the reasons (e.g., not enough observations).
-- Output_KBAs_v7.Rmd: it generates a html full report for species with model predictions.
+- `Output_KBAs_v7_empty_v2.Rmd`: it generates a html for those species where is imposible to run HSMs. We specified the reasons (e.g., not enough observations).
+- `Output_KBAs_v7.Rmd`: it generates a html full report for species with model predictions.
 - Note: link for each species were manually manually to the master document.
 
 ## Data
