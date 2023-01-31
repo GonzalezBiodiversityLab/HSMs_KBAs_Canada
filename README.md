@@ -6,8 +6,7 @@
 + Ciara Raudsepp_Hearne (WCS-KBA Canada coordinator)
 
 ## Overview
-Screening potential areas for Key Biodiversity Areas (KBAs) in Canada (`http://www.kbacanada.org/`), using Habitat Suitability Models (HSMs) for species that might trigger A1 (threatened species) and B1 (geographic restricted species) KBA criteria  (see KBA standard: `https://portals.iucn.org/library/node/46259`).
-
+Screening potential areas for <a href="http://www.kbacanada.org/" target="_blank">Key Biodiversity Areas (KBAs) in Canada</a>, using Habitat Suitability Models (HSMs) for species that might trigger A1 (threatened species) and B1 (geographic restricted species) KBA criteria  (see <a href="https://portals.iucn.org/library/node/46259" target="_blank"KBA standard</a>)
 
 ## Scope/extent
 - This is an exploratory analysis using coarse resolution datasets (~1km2).
