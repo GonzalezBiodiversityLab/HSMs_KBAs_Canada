@@ -732,7 +732,11 @@ print("Loading point features")
       projectRaster(res=1000, crs=aeac, method = "bilinear")%>%
       resample(roughness_NA_aeac_ebar, method = "ngb")
       names(Band_3_aeac_r) <- "Variation_annual_productivity_b3"
-  
+ 
+  ### Note about Land Cover in the analysis.  We evaluated including ESA land cover classes, however predictions where
+      # strongly biased  towards urban/roads areas. Most likely because surveys are close to roads/cities and also due to the coarse resolution of the analysis.
+      # Further analysis might consider including the proportion of land cover class preferred by each species (ESA 250m res.) within a 1Km2.
+      
 # 2.5.4 Soils (WE DID NOT USED THIS DATASETS: LOTS OF NA values (especially in t the coastlines),
         # Observations will be removed when fall in these NAs values. The effect is particularly strong for
         # species with small number of observations 
