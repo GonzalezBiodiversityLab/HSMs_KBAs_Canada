@@ -1,0 +1,1208 @@
+---
+title: <center>"Screening potential areas for Key Biodiversity Areas (KBAs) in Canada. Species that might trigger A1 (threatened species) and B1 (geographic restricted species) criteria"</center>
+author: "Juan Zuloaga & Andrew Gonzalez, McGill University"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    keep_md: true
+    css: mycss.css
+
+---
+
+```{r, include=FALSE}
+############################################################################
+#                           KBAS Canada                                    #
+#                                                                          #
+#                  MODULE 1. SPECIES DISTRIBUTION MODELS                   #
+#                                                                          #
+#             Identifying suitable habitats for all species                #
+#                   that migth trigger A1, B1 criteria                     #
+#                                                                          #
+#                           by Juan Zuloaga                                #
+#                Post-doctoral Researcher, McGill University               #
+#                         Andrew Gonzalez Lab                              #
+#                          October 2019  (R x64 3.6.1)                     #
+############################################################################ 
+
+```
+
+# {.tabset .tabset-pills}
+
+## OVERVIEW
+
+We identified potential high suitable areas for a group of species triggering criteria A1 (threatened species) and B1 (geographic restricted species) aimed to inform the Key Biodiversity Areas (KBAs) initiative in Canada (see <a href="http://www.kbacanada.org/" target="_blank">KBAs Canada</a> and <a href="https://portals.iucn.org/library/node/46259" target="_blank">KBA standard</a>). To do that, we first evaluated habitat suitability models relating species presence-only data sets and predictor variables, using the  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">Maxent algorithm</a>  implemented in the  ENMeval v.2.0.0 package (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al 2021</a>) in R. Then, we used cluster analysis to identify discrete polygons containing most of the high suitable areas. 
+
+We ran the analysis for a group of 96 species as a proof of concept aimed to provide recommendations for a full implementation (~ 1,200 species). 
+
+In this report we present these sections:
+
+
++ **Workflow**: in this section describe all the steps we followed to implement HSMs and identify potential areas for KBAs.
++ **Results**: in this section we describe our findings for all species evaluated and some recommendations for further steps.
++ **Species reports**: in this section you can access detailed results for each species, including maps (e.g., habitat suitability predictions, uncertainty), performance metrics, variable importance, among others.
++ **Methods**: in this section we present a complete description of the analysis, data sets and tools we used and applied in each step of the process.
+
+
+<div style="padding: 15px; border: 1px solid transparent; border-color: transparent; margin-bottom: 20px; border-radius: 4px; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6;">
+
+**Scope of the analysis**
+
++ This large-scale analysis offers the first approximation to identify potential areas that might harbor KBAs in Canada, for a large group of species of interest (~ 1,200 species).
+
++ The spatial resolution of this analysis is ~1 km2.
+
++ This macro-analysis will follow expert reviews and local-scale analysis with finer data sets.
+
++  It will help also to prioritize areas for further automated KBA assessments.
+
++ We used this approach to identify areas not only for species of 'global interest' (i.e., triggering A1 and B1 criteria) but for some species of 'national interest' (i.e., these species could trigger national A1 and B1 KBAs in Canada).
+
++ Because the geographic range of some species go across the border, we collected and analyzed data for North America as an area of study (Canada,  US, and Mexico).
+
++  The selection of species for this first batch was based on the status of the EBAR-maps, as follow:
+  
+  
+    - Reviewed by experts (128).  We are going to start with this group as a proof of concept (we ran HSMs for 96 species).
+  
+    - Species with EBAR-maps partially reviewed by experts (98). 
+  
+    - Species with EBAR-maps auto-generated (921). 
+
+
++ This tool was designed to be updated and replicated (e.g., if new species and observations are added to the list). Scripts were developed in R and interactive outputs in Markdown.
+
++ Because this tool was designed to offer relevant information to a wide spectrum of users and decision makers and to facilitate their decision-making process, we provide results for each step of the process that may impact model reliability and usefulness of final outputs. 
+
+
+ </div>
+
+
+<br>
+
+## WORKFLOW
+
+The workflow presented below describes the steps we follow to identify potential sites for all species triggering Criteria A1 and B1 (see <a href="https://portals.iucn.org/library/node/46259" target="_blank">KBA standard</a> for additional information). We also offer a preliminary analyses of the sensitivity of these areas to climate change scenarios.
+
+We developed a top-down approach that can:
+
++ be applied to all trigger species.
++ be updated and replicated.
++ offer a quick overview and assessment of potential sites for KBAs.
++ be complemented with bottom-up approaches currently under development.
+
+Figures and maps presented here are **only for illustration** purposes.
+
+
+
+<center>-------------------------------</center>
+
+**1.** We started the workflow by asking **where are high suitable areas located** within the geographic range of the species?
+
+To do that we implemented Habitat suitability Models (HSMs) aimed to identify high suitable areas within the geographic range of each species. As geographic range proxy we used ecosystem-based automated range <a href="https://www.natureserve.org/natureserve-network/canada/biodiversity-data/ebar-range-mapping" target="_blank">(EBAR)</a> maps developed by NatureServe Canada to bound each HSM (see more information <a href="https://1drv.ms/b/s!Ajv6BHSXrqqqm4xipeEOQ67IfH77IQ?e=dqM1FO" target="_blank">here</a>). EBAR maps are comprised of jurisdiction approved Ecoshapes (generally Ecodistricts, Level IV Ecoregions, or similar) that are triggered by species observations. EBAR maps were also subject to a thorough process of review by experts on each of the species of interest. 
+
+<br>
+![](./HSMs_html_outputs/Figures_Macro_doc/hsm_1.png)
+
+<br>
+
+**2.** Then, we were interested in **knowing whether high suitable areas were clustered or dispersed across the landscape**.
+
+This is our first approximation to identify potential areas harboring most of the high suitable areas that might harbor KBAs.
+
+![](./HSMs_html_outputs/Figures_Macro_doc/HSM_2.png)
+
+
+
+
+<br>
+**3.** Finally, we evaluated **to what extent high suitable areas might change in the future under various climate change scenarios**.
+
+This additional evaluation will provide decision-makers with a sense of potential threats for species due to different scenarios of climate change.
+
+We provide maps identifying where those changes ('losing' or 'gaining' suitable areas) might occur within the geographic range of each species.
+
+![](./HSMs_html_outputs/Figures_Macro_doc/HSM_3.png)
+
+<br>
+
+<a href="#top">Back to top</a>
+<center>-------------------------------</center>
+
+
+<br>
+
+## RESULTS
+
+In this section we present a summary of the general findings we encountered when running HSMs for a sample of 96 species triggering criteria A1 (threatened species) and B1 (geographic restricted species) aimed to inform the Key Biodiversity Areas (KBAs) initiative in Canada (see Figure below).
+
+We also want to highlight some of the main challenges we encountered when running multiple HSMs.  
+
+Let's start describing the outputs we obtained from this process.
+
+**1. Unable to run HSMs**
+
+There is a group of species where we were unable to run run HSMs.  We identified three cases:
+
++ **Computer performance limitations (n=34; 35%)**: we used a PC with 16GB in RAM and ran  HSMs in parallel, using the ENMeval package option. It seems that it is not enough clusters for some species that have a broad geographic extent. Computer crashed after 4-5 hours.  We recommend to move the analysis fr this group of species to a High Performance Computer (HPC). It is likely that this group of species will generate reliable models, because they have good number of observations.
+
++ **Not enough observations (n=20; 21%)**: HSMs do not run with species with less than 3 observations (at least using th ENMeval package and Maxent Algorithm). We suggest to use alternative ways to inform KBAs initiative, such as: expert knowledge, current observations and/or critical habitat.
+
++ **Some spatial issues between observations and EBARS (n=2; 2%)**: we were unable to run models for two species. It seems that observations and EBARs are in a different coordinates systems, so they do not overlap. This is something to review with NatureServe.
+
+<br>
+**2. Species with HSMs predictions**
+
+For this group of species we were able to run HSMs and classified them based on one of the model performance metric "Omission rate (OR)", as follow:
+
+Omission rate (OR) indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): 
+
++  There is `r kableExtra::text_spec("high concern; OR > 0.50", color="white", background = "red")` in model predictions **(n=13; 14%)**. Most of the species had 3 observations. However, some species with 7-10 observations performed similarly poor. We recommend to let the algorithm run the model (even with 3 observations) and use one of the performance metrics (e.g. OR) to decided model usefulness. We suggest to use alternative ways to inform KBAs initiative, using expert knowledge, current observations and/or critical habitat.
+
+
++  There is `r kableExtra::text_spec("some concern; OR Between 0.25-0.50", color="white", background = "orange")` in model predictions **(n=7; 7%)**.  This is a group of species with low number of observations (6-13) and intermediate values for OR.  We recommend to treat this species also as a 'concern in model predictions'. We suggest to use alternative ways to inform KBAs initiative, using expert knowledge, current observations and/or critical habitat.
+
+
++  Model predictions can be `r kableExtra::text_spec("informative; OR <= 0.25", color="white", background = "darkgreen")`  **(n=20; 21%)**: This is a group of species with low to high number of observations (8-47) and high values for OR.  We believe that these models can ofe some relevant information to inform KBAs initiative. We expect that running the group of species with computer performance limitations (n=34; 35%) in a HPC will result in an increase of the percentage of informative models to 40-50%.  The reason: this group of species present huge number of observations. If true, we could expect at least 500 or so informative HSMs for the entire group of ~1,200 species.
+
+
+<br>
+![](./HSMs_html_outputs/Figures_Macro_doc/summary_HSMs_KBAs.png)
+
+
+
+
+<br>
+
+
+
+
+
+
+
+## SPECIES REPORTS
+
+
+List of species triggering A1 (threatened species) and B1 (geographically restricted species) criteria defined in the <a href="https://portals.iucn.org/library/node/46259" target="_blank">KBA standard</a>. You can search for species using common or scientific names (in alphabetical order).
+
+Colors refer to what we obtained after implementing HSMs.  For instance:
+
++ <span style="color:green">Model predictions can be informative</span>.
+
++ <span style="color:orange">There is some concern in model predictions</span>.
+
++ <span style="color:red">High concern in model predictions</span>.
+
++ <span style="color:brown">Unable to run model predictions: less than 3 observations</span>.
+
++ <span style="color:black">Unable to run models (not enough memory): it requires to move HSMs analysis to High Performance Computer (HPC)</span>
+
++ <span style="color:magenta">Unable to run model predictions: observations outside EBARs (may be different coordinates system)</span>.
+
+Click on species link (if available) to see results.
+
+
+
+<details>
+  <summary> <span style="color:blue">Search by: COMMON NAME</span> (Click to expand)</summary>
+ 
++ <a href="./Euxoa_apopsis.html" target="_blank"><span style="color:brown">a dart moth</a></span>.
++ <span style="color:black">a pinion moth</span>.
++ <a href=".//Chionodes_mikkolai.html" target="_blank"><span style="color:brown">a twirler moth</a></span>.
++ <a href=".//Crataegus_rivuloadamensis.html" target="_blank"><span style="color:green">Adams Creek Hawthorn</a></span>.
++ <span style="color:black">Alaska Bugseed</span>.
++ <a href=".//Justicia_americana.html" target="_blank"><span style="color:green">American Water-willow</a></span>.
++ <a href=".//Cardamine_angulata.html" target="_blank"><span style="color:green">Angled Bittercress</span></a>.
++ <span style="color:black">Aweme Borer Moth</span>.
++ <a href=".//Bolshecapnia_gregsoni.html" target="_blank"><span style="color:brown">Alpine Snowfly</span></a>.
++ <span style="color:black">American Bumble Bee</span>.
++ <a href=".//Metarranthis_apiciaria.html" target="_blank"><span style="color:green">Barrens Metarranthis Moth</span></a>.
++ <a href=".//Crataegus_rivulopugnensis.html" target="_blank"><span style="color:green">Battle Creek Hawthorn</span></a>.
++ <span style="color:black">Beautiful Eutelia</span>.
++ <span style="color:magenta">Beringian Grass Leafhopper</span>.
++ <a href=".//Corispermum_hookeri_var._pseudodeclinatum.html" target="_blank"><span style="color:brown">British Columbia Bugseed</span></a>.
++ <a href=".//Draba_caswellii.html" target="_blank"><span style="color:brown">Caswell’s Draba</span></a>.
++ <a href=".//Catinella_aprica.html" target="_blank"><span style="color:orange">Diurnal Ambersnail</span></a>.
++ <span style="color:black">Creamy Milk-vetch</span>.
++ <span style="color:black">Coast Microseris</span>.
++ <a href=".//Exoprosopa_doris.html" target="_blank"><span style="color:brown">Doris’s Bee Fly</span></a>.
++ <a href=".//Crataegus_beata.html" target="_blank"><span style="color:red">Dunbar’s Hawthorn</span></a>.
++ <a href=".//Adiantum_aleuticum_var._subpumilum.html" target="_blank"><span style="color:red">Dwarf Coastal Maidenhair Fern</span></a>.
++ <a href=".//Crataegus_aquacervensis.html" target="_blank"><span style="color:green">Elkwater Hawthorn</span></a>.
++ <a href=".//Crataegus_enderbyensis.html" target="_blank"><span style="color:red">Enderby Hawthorn</span></a>.
++ <span style="color:black">Foothill Sedge</span>.
++ <a href=".//Draba_franktonii.html" target="_blank"><span style="color:brown">Frankton’s Draba</span></a>.
++ <a href=".//Baetis_persecutor.html" target="_blank"><span style="color:brown">Galling Small Minnow Mayfly</span></a>.
++ <a href=".//Micranthes_gaspensis.html" target="_blank"><span style="color:brown">Gaspé Saxifrage</span></a>.
++ <a href=".//Melanoplus_gaspesiensis.html" target="_blank"><span style="color:brown">Gaspésie Grasshopper</span></a>.
++ <span style="color:black">Golden Northern Bumble Bee</span>.
++ <span style="color:black">Golden Paintbrush</span>.
++ <span style="color:black">Goldenseal</span>.
++ <a href=".//Braya_pilosa.html" target="_blank"><span style="color:orange">Hairy Braya</span></a>.
++ <span style="color:black">Hairy Prairie-clover</span>.
++ <a href=".//Brychius_hungerfordi.html" target="_blank"><span style="color:green">Hungerford’s Crawling Water Beetle</span></a>.
++ <span style="color:black">Kellogg's Rush</span>.
++ <a href=".//Draba_bruce-bennettii.html" target="_blank"><span style="color:red">Klaza Draba</span></a>.
++ <a href=".//Dodia_kononenkoi.html" target="_blank"><span style="color:brown">Kononenko’s Dodia</span></a>.
++ <a href=".//Achillea_millefolium_var._megacephala.html" target="_blank"><span style="color:orange">Large-headed Woolly Yarrow</span></a>.
++ <a href=".//Crataegus_purpurella.html" target="_blank"><span style="color:green">Loch Lomond Hawthorn</span></a>.
++ <a href=".//Melanoplus_digitifer.html" target="_blank"><span style="color:red">Long-toed Grasshopper</span></a>.
++ <a href=".//Limnanthes_macounii.html" target="_blank"><span style="color:orange">Macoun’s Meadowfoam</span></a>.
++ <a href=".//Melanoplus_madeleineae.html" target="_blank"><span style="color:brown">Magdalen Island Grasshopper</span></a>.
++ <a href=".//Anisota_manitobensis.html" target="_blank"><span style="color:green">Manitoba Oakworm Moth</span></a>.
++ <a href=".//Chenopodium_incanum_var._incanum.html" target="_blank"><span style="color:brown">Mealy Goosefoot</span></a>.
++ <span style="color:black">Melsheimer's Sack Bearer</span>.
++ <a href=".//Crataegus_perjucunda.html" target="_blank"><span style="color:red">Middlesex Frosted Hawthorn</span></a>.
++ <span style="color:black">Mountain Moonwort</span>.
++ <a href=".//Bolshecapnia_rogozera.html" target="_blank"><span style="color:brown">Moosehorn Snowfly</span></a>.
++ <span style="color:black">Morrison's Bumble Bee</span>.
++ <a href=".//Melanoplus_rugglesi.html" target="_blank"><span style="color:brown">Nevada Sage Grasshopper</span></a>.
++ <a href=".//Crataegus_okennonii.html" target="_blank"><span style="color:green">O’Kennon’s Hawthorn</span></a>.
++ <a href=".//Elatine_ojibwayensis.html" target="_blank"><span style="color:brown">Ojibway Waterwort</span></a>.
++ <a href=".//Efferia_okanagana.html" target="_blank"><span style="color:green">Okanagan Robber Fly</span></a>.
++ <a href=".//Micranthes_tischii.html" target="_blank"><span style="color:green">Olympic Saxifrage</span></a>.
++ <a href=".//Crataegus_orbicularis.html" target="_blank"><span style="color:red">Orbicular-leaved Hawthorn</span></a>.
++ <span style="color:black">Ottoe Skipper</span>.
++ <span style="color:black">Pacific Volcano Moss</span>.
++ <a href=".//Dissosteira_spurcata.html" target="_blank"><span style="color:brown">Pale-winged Grasshopper</span></a>.
++ <span style="color:black">Phipps' Hawthorn</span>.
++ <a href=".//Catinella_exile.html" target="_blank"><span style="color:red">Pleistocene Catinella</span></a>.
++ <span style="color:black">Pumpkin Ash</span>.
++ <span style="color:black">Puttyroot</span>.
++ <a href=".//Draba_puvirnituqii.html" target="_blank"><span style="color:brown">Puvirnituq Mountain Draba</span></a>.
++ <span style="color:black">Pygmy Pocket Moss</span>.
++ <span style="color:black">Orange Wing Moth</span>.
++ <a href=".//Geum_schofieldii.html" target="_blank"><span style="color:green">Queen Charlotte Avens</span></a>.
++ <a href=".//Festuca_pseudovivipara.html" target="_blank"><span style="color:red">Queen Charlotte Islands Fescue</span></a>.
++ <a href=".//Enemion_savilei.html" target="_blank"><span style="color:green">Queen Charlotte Islands False Rue-anemone</span></a>.
++ <a href=".//Crataegus_rubribracteolata.html" target="_blank"><span style="color:green">Red Bracteole Hawthorn</span></a>.
++ <span style="color:black">Red-tailed Prairie Leafhopper</span>.
++ <span style="color:black">Rusty-patched Bumble Bee</span>.
++ <span style="color:black">Scalloped Sack-bearer Moth</span>.
++ <a href=".//Crataegus_sheila-phippsiae_var._sheila-phippsiae.html" target="_blank"><span style="color:red">Sheila Phipps’ Hawthorn</span></a>.
++ <a href=".//Crataegus_shuswapensis.html" target="_blank"><span style="color:green">Shuswap Hawthorn</span></a>.
++ <span style="color:magenta">Spalding's Milk-vetch</span>.
++ <a href=".//Bradynotes_obesa.html" target="_blank"><span style="color:red">Slow Mountain Grasshopper</span></a>.
++ <span style="color:black">Small Whorled Pogonia</span>.
++ <a href=".//Dodia_verticalis.html" target="_blank"><span style="color:red">Straight-lined Dodia</span></a>.
++ <span style="color:black">Streambank Lupine</span>.
++ <a href=".//Draba_taylori.html" target="_blank"><span style="color:orange">Taylor’s Draba</span></a>.
++ <a href=".//Eleocharis_aestuum.html" target="_blank"><span style="color:brown">Tidal Spikerush</span></a>.
++ <span style="color:black">Tulip-Tree Beauty</span>.
++ <span style="color:black">Tiny Cryptantha</span>.
++ <a href=".//Erigeron_philadelphicus_var._glaber.html" target="_blank"><span style="color:brown">Vancouver Island Fleabane</span></a>.
++ <a href=".//Crataegus_chrysocarpa_var._vernonensis.html" target="_blank"><span style="color:green">Vernon Hawthorn</span></a>.
++ <a href=".//Castilleja_victoriae.html" target="_blank"><span style="color:red">Victoria’s Paintbrush</span></a>.
++ <a href=".//Gentianopsis_virgata_ssp._victorinii.html" target="_blank"><span style="color:green">Victorin’s Fringed Gentian</span></a>.
++ <span style="color:black">Vitt's Extinguisher Moss</span>.
++ <a href=".//Festuca_washingtonica.html" target="_blank"><span style="color:green">Washington Fescue</span></a>.
++ <span style="color:black">Washington Spring Beauty</span>.
++ <span style="color:black">White Meconella</span>.
++ <a href=".//Astragalus_sclerocarpus.html" target="_blank"><span style="color:green">Woody-pod Milk-vetch</span></a>.
++ <span style="color:black">Wright's Spikerush</span>.
++ <a href=".//Abronia_latifolia.html" target="_blank"><span style="color:green">Yellow Sand-verbena</span></a>.
++ <a href=".//Bruneria_yukonensis.html" target="_blank"><span style="color:red">Yukon Grasshopper</span></a>.
+
+
+
+
+
+
+<a href="#top">Back to top</a>
+
+</details>
+
+
+<details>
+  <summary> <span style="color:blue">Search by: NATIONAL_SCIENTIFIC_NAME</span> (Click to expand)</summary>
+  
++ <a href=".//Abronia_latifolia.html" target="_blank"><span style="color:green">*Abronia latifolia*</span></a>.
++ <a href=".//Achillea_millefolium_var._megacephala.html" target="_blank"><span style="color:orange">*Achillea millefolium var. megacephala*</span></a>.
++ <a href=".//Adiantum_aleuticum_var._subpumilum.html" target="_blank"><span style="color:red">*Adiantum aleuticum var. subpumilum*</span></a>.
++ <span style="color:black">*Aflexia rubranura*</span>.
++ <a href=".//Anisota_manitobensis.html" target="_blank"><span style="color:green">*Anisota manitobensis*</span></a>.
++ <span style="color:black">*Aplectrum hyemale*</span>.
++ <span style="color:black">*Astragalus racemosus var. racemosus*</span>.
++ <a href=".//Astragalus_sclerocarpus.html" target="_blank"><span style="color:green">*Astragalus sclerocarpus*</span></a>.
++ <span style="color:magenta">*Astragalus spaldingii*</span>.
++ <span style="color:magenta">*Athysanella resusca*</span>.
++ <a href=".//Baetis_persecutor.html" target="_blank"><span style="color:brown">*Baetis persecutor*</span></a>.
++ <a href=".//Bolshecapnia_gregsoni.html" target="_blank"><span style="color:brown">*Bolshecapnia gregsoni*</span></a>.
++ <a href=".//Bolshecapnia_rogozera.html" target="_blank"><span style="color:brown">*Bolshecapnia rogozera*</span></a>.
++ <span style="color:black">*Bombus affinis*</span>.
++ <span style="color:black">*Bombus fervidus*</span>.
++ <span style="color:black">*Bombus morrisoni*</span>.
++ <span style="color:black">*Bombus pensylvanicus*</span>.
++ <span style="color:black">*Botrychium montanum*</span>.
++ <span style="color:black">*Brachydontium olympicum*</span>.
++ <a href=".//Bradynotes_obesa.html" target="_blank"><span style="color:red">*Bradynotes obesa*</span></a>.
++ <a href=".//Braya_pilosa.html" target="_blank"><span style="color:orange">*Braya pilosa*</span></a>.
++ <a href=".//Bruneria_yukonensis.html" target="_blank"><span style="color:red">*Bruneria yukonensis*</span></a>.
++ <a href=".//Brychius_hungerfordi.html" target="_blank"><span style="color:green">*Brychius hungerfordi*</span></a>.
++ <a href=".//Cardamine_angulata.html" target="_blank"><span style="color:green">*Cardamine angulata*</span></a>.
++ <span style="color:black">*Carex tumulicola*</span>.
++ <span style="color:black">*Castilleja levisecta*</span>.
++ <a href=".//Castilleja_victoriae.html" target="_blank"><span style="color:red">*Castilleja victoriae*</span></a>.
++ <a href=".//Catinella_aprica.html" target="_blank"><span style="color:orange">*Catinella aprica*</span></a>.
++ <a href=".//Catinella_exile.html" target="_blank"><span style="color:red">*Catinella exile*</span></a>.
++ <a href=".//Chenopodium_incanum_var._incanum.html" target="_blank"><span style="color:brown">*Chenopodium incanum var. incanum*</span></a>.
++ <a href=".//Chionodes_mikkolai.html" target="_blank"><span style="color:brown">*Chionodes mikkolai*</span></a>.
++ <span style="color:black"><span style="color:black">*Cicinnus melsheimeri*</span></span>.
++ <span style="color:black">*Claytonia washingtoniana*</span>.
++ <a href=".//Corispermum_hookeri_var._pseudodeclinatum.html" target="_blank"><span style="color:brown">*Corispermum hookeri var. pseudodeclinatum*</span></a>.
++ <span style="color:black">*Corispermum ochotense var. alaskanum*</span>.
++ <a href=".//Crataegus_aquacervensis.html" target="_blank"><span style="color:green">*Crataegus aquacervensis*</span></a>.
++ <a href=".//Crataegus_beata.html" target="_blank">*Crataegus beata*</a>.
++ <a href="./HSMs_html_outputs/Crataegus_chrysocarpa_var._vernonensis.html" target="_blank"><span style="color:green">*Crataegus chrysocarpa var. vernonensis*</span></a>.
++ <a href=".//Crataegus_enderbyensis.html" target="_blank"><span style="color:red">*Crataegus enderbyensis*</span></a>.
++ <a href=".//Crataegus_okennonii.html" target="_blank"><span style="color:green">*Crataegus okennonii*</span></a>.
++ <a href=".//Crataegus_orbicularis.html" target="_blank"><span style="color:red">*Crataegus orbicularis*</span></a>.
++ <a href=".//Crataegus_perjucunda.html" target="_blank"><span style="color:red">*Crataegus perjucunda*</span></a>.
++ <span style="color:black">*Crataegus phippsii*</span>.
++ <a href=".//Crataegus_purpurella.html" target="_blank"><span style="color:green">*Crataegus purpurella*</span></a>.
++ <a href=".//Crataegus_rivuloadamensis.html" target="_blank"><span style="color:green">*Crataegus rivuloadamensis*</span></a>.
++ <a href=".//Crataegus_rivulopugnensis.html" target="_blank"><span style="color:green">*Crataegus rivulopugnensis*</span></a>.
++ <a href=".//Crataegus_rubribracteolata.html" target="_blank"><span style="color:green">*Crataegus rubribracteolata*</span></a>.
++ <a href=".//Crataegus_sheila-phippsiae_var._sheila-phippsiae.html" target="_blank"><span style="color:red">*Crataegus sheila-phippsiae var. sheila-phippsiae*</span></a>.
++ <a href=".//Crataegus_shuswapensis.html" target="_blank"><span style="color:green">*Crataegus shuswapensis*</span></a>.
++ <span style="color:black">*Cryptantha minima*</span>.
++ <span style="color:black">*Dalea villosa var. villosa*</span>.
++ <a href=".//Dissosteira_spurcata.html" target="_blank"><span style="color:brown">*Dissosteira spurcata*</span></a>.
++ <a href=".//Dodia_kononenkoi.html" target="_blank"><span style="color:brown">*Dodia kononenkoi*</span></a>.
++ <a href=".//Dodia_verticalis.html" target="_blank"><span style="color:red">*Dodia verticalis*</span></a>.
++ <a href=".//Draba_bruce-bennettii.html" target="_blank"><span style="color:red">*Draba bruce-bennettii*</span></a>.
++ <a href=".//Draba_caswellii.html" target="_blank"><span style="color:brown">*Draba caswellii*</span></a>.
++ <a href=".//Draba_franktonii.html" target="_blank"><span style="color:brown">*Draba franktonii*</span></a>.
++ <a href=".//Draba_puvirnituqii.html" target="_blank"><span style="color:brown">*Draba puvirnituqii*</span></a>.
++ <a href=".//Draba_taylori.html" target="_blank"><span style="color:orange">*Draba taylori*</span></a>.
++ <a href=".//Efferia_okanagana.html" target="_blank"><span style="color:green">*Efferia okanagana*</span></a>.
++ <a href=".//Elatine_ojibwayensis.html" target="_blank"><span style="color:brown">*Elatine ojibwayensis*</span></a>.
++ <a href=".//Eleocharis_aestuum.html" target="_blank"><span style="color:brown">*Eleocharis aestuum*</span></a>.
++ <span style="color:black">*Eleocharis diandra*</span>.
++ <span style="color:black">*Encalypta vittiana*</span>.
++ <a href=".//Enemion_savilei.html" target="_blank"><span style="color:green">*Enemion savilei*</span></a>.
++ <span style="color:black">*Epimecis hortaria*</span>.
++ <a href=".//Erigeron_philadelphicus_var._glaber.html" target="_blank"><span style="color:brown">*Erigeron philadelphicus var. glaber*</span></a>.
++ <span style="color:black">*Eutelia pulcherrimus*</span>.
++ <a href=".//Euxoa_apopsis.html" target="_blank"><span style="color:brown">*Euxoa apopsis*</span></a>.
++ <a href=".//Exoprosopa_doris.html" target="_blank"><span style="color:brown">*Exoprosopa doris*</span></a>.
++ <a href=".//Festuca_pseudovivipara.html" target="_blank"><span style="color:red">*Festuca pseudovivipara*</span></a>.
++ <a href=".//Festuca_washingtonica.html" target="_blank"><span style="color:green">*Festuca washingtonica*</span></a>.
++ <span style="color:black">*Fissidens exilis*</span>.
++ <span style="color:black">*Fraxinus profunda*</span>.
++ <a href=".//Gentianopsis_virgata_ssp._victorinii.html" target="_blank"><span style="color:green">*Gentianopsis virgata ssp. victorinii*</span></a>.
++ <a href="./HSMs_html_outputs/Geum_schofieldii.html" target="_blank"><span style="color:green">*Geum schofieldii*</span></a>.
++ <span style="color:black">*Hesperia ottoe*</span>.
++ <span style="color:black">*Hydrastis canadensis*</span>.
++ <span style="color:black">*Isotria medeoloides*</span>.
++ <span style="color:black">*Juncus kelloggii*</span>.
++ <a href=".//Justicia_americana.html" target="_blank"><span style="color:green">*Justicia americana*</span></a>.
++ <span style="color:black">*Lacosoma chiridota*</span>.
++ <a href=".//Limnanthes_macounii.html" target="_blank"><span style="color:green">*Limnanthes macounii*</span></a></a>.
++ <span style="color:black">*Lithophane scottae*</span>.
++ <span style="color:black">*Lupinus rivularis*</span>.
++ <span style="color:black">*Meconella oregana*</span>.
++ <a href=".//Melanoplus_digitifer.html" target="_blank"><span style="color:red">*Melanoplus digitifer*</span></a>.
++ <a href=".//Melanoplus_gaspesiensis.html" target="_blank"><span style="color:brown">*Melanoplus gaspesiensis*</span></a>.
++ <a href=".//Melanoplus_madeleineae.html" target="_blank"><span style="color:brown">*Melanoplus madeleineae*</span></a>.
++ <a href=".//Melanoplus_rugglesi.html" target="_blank"><span style="color:brown">*Melanoplus rugglesi*</span></a>.
++ <span style="color:black">*Mellilla xanthometata*</span>.
++ <a href=".//Metarranthis_apiciaria.html" target="_blank"><span style="color:green">*Metarranthis apiciaria*</span></a>.
++ <a href=".//Micranthes_gaspensis.html" target="_blank"><span style="color:brown">*Micranthes gaspensis*</span></a>.
++ <a href=".//Micranthes_tischii.html" target="_blank"><span style="color:green">*Micranthes tischii*</span></a>.
++ <span style="color:black">*Microseris bigelovii*</span>.
++ <span style="color:black">*Papaipema aweme*</span>.
+
+
+
+
+
+</details>
+<br>
+
+
+
+<a href="#top">Back to top</a>
+ <br>
+
+## METHODS
+
+In this section we offer a complete description of the methods, tools, data sets and analysis we used and applied in each step of the process.
+
+Figures and maps presented here are **only for illustration** purposes.
+
+
+<span style="color:blue">1. HABITAT SUITABILITY MODELS (HSMs)</span>
+
+<details>
+  <summary> <span style="color:#6699CC">1.1 Overview </span> (Click to expand)</summary>
+  
+<br>
+**Introduction**
+
+We implemented Habitat Suitability Models (HSMs) to identify high suitable areas within the species geographic range (using EBARs as a proxy, see description below) and evaluate potential changes of these areas due to climate change.
+
+HSMs are ecological tools that relate species observations (presence or presence-absence) and environmental (biotic or abiotic) predictor variables (e.g., climate, land cover, topography) to predict suitable habitat across a landscape or a region (<a href="https://www.annualreviews.org/doi/full/10.1146/annurev.ecolsys.110308.120159" target="_blank">Elith and Leatwick 2009</a>).
+
+We followed, as best as we could, the standards protocols for reporting HSMs proprosed by <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.04960?campaign=wolearlyview" target="_blank">Zurrell et al 2020</a>.
+
+
+<br>
+**Model Objective**
+
+Two main modelling purposes in this study:
+
++ Identifying high suitable areas for all species of interest (i.e., objective = 'Mapping' sensu <a href="https://advances.sciencemag.org/content/5/1/eaat4858.abstract" target="_blank">Araújo et al 2019</a>); and, 
+
++ Evaluating changes in habitat suitability due to future scenarios of climate change (i.e., objective = 'Transfering' sensu <a href="https://advances.sciencemag.org/content/5/1/eaat4858.abstract" target="_blank">Araújo et al 2019</a>).
+
+<br>
+**Data type**
+
+*Observations*
+
+We used presence-only data from NatureServe Canada that includes multiple sources and different types of features. 
+
+*Data sharing agreements*
+
+Due to data sharing agreements we will not display in this tool any features representing occurrences used in this analysis.
+
+Similarly, we also excluded the following data from HSMs modelling:
+
++ Unobscured versions of iNaturalist obscured records.
+
++ Canadian Wildlife Service records.
+
++ Records for British Columbia species subject to persecution and harm.
+
+Our coarse analysis and outputs (grid cell size ~ 1km2) is complying with data providers requirements of data outputs generalization. That is, cell must be generalized to 1000m in any external products generalization.
+
+
+*Data providers*
+
++ NatureServe Canada (NSC)
++ Alberta Fisheries and Wildlife Management Information System (FWMIS)
++ Alberta Conservation Information Management System (ACIMS)
++ Atlantic Canada Conservation Data Centre (ACCDC)
++ British Columbia Conservation Data Centre (BCCDC)
++ Manitoba Conservation Data Centre (MBCDC)
++ Northwest Territories Conservation Data Centre (NWTCDC)
++ Nunavut Conservation Data Centre (NUCDC)
++ Ontario Natural Heritage Information Centre (NHIC)
++ Centre de Données sur le Patrimoine Naturel du Québec (CDPNQ)
++ Saskatchewan Conservation Data Centre (SKCDC)
++ Yukon Conservation Data Center (YTCDC)
++ NatureServe US
++ Ditto
++ Manitoba Museum Collections
++ Bumble Bees of North America Database
++ iNaturalist Restricted - set to “obscured” and/or “private” in the iNaturalist.ca platform by the contributing citizen scientists or for species which the geoprivacy is automatically set to “obscured” (species subject to persecution and harm)
++ Bumble Bee Watch
++ University of Alaska Museum
+
+
+
+*Species Geographic range maps*
+
+We used ecosystem-based automated range <a href="https://www.natureserve.org/natureserve-network/canada/biodiversity-data/ebar-range-mapping" target="_blank">(EBAR)</a> maps developed by NatureServe Canada to bound each HSM (see more information <a href="https://1drv.ms/b/s!Ajv6BHSXrqqqm4xipeEOQ67IfH77IQ?e=dqM1FO" target="_blank">here</a>). EBAR maps are comprised of jurisdiction approved Ecoshapes (generally Ecodistricts, Level IV Ecoregions, or similar) that are triggered by species observations. EBAR maps were also subject to a thorough process of review by experts on each of the species of interest.
+
+
+As August 2021, this is the list and status of EBARs for species triggering A1 and B1 criteria.
+
+  + reviewed by experts (128).  We are going to start with this group of species as a proof of concept.
+  
+  + Species with EBAR-maps partially reviewed by experts (98). 
+  
+  + Species with EBAR-maps auto-generated (921). 
+
+*Predictors*
+
+We used raster data sets for environmental predictors available online at similar scales and without any spatial gaps in North America. 
+
++ Habitat heterogeneity metrics:  5
++ Dynamic Habitat Index (DHI) metrics:  3
++ Freshwater distance: 2
++ Bioclim variables: 19 
+
+
+<br>
+**Spatial resolution**
+
+HSMs outputs are generated at ~ 1Km2 spatial resolution.
+Note that all maps were projected to North American Albers Equal Area Conic to preserve the sense of area.
+
+<br>
+**Taxon/species level**
+
+Single species models.
+
+<br>
+**Algorithm**
+
+We implemented Habitat Suitability Models (HSMs)  to predict suitable habitat across the species geographic distribution (<a href="https://www.annualreviews.org/doi/full/10.1146/annurev.ecolsys.110308.120159" target="_blank">Elith and Leatwick 2009</a>). HSMs are ecological tools that relate species observations (presence or presence-absence) and environmental (biotic or abiotic) predictor variables (e.g., climate, land cover, topography). These empirical models rely on correlative relationships between species occurrences and environmental variables <a href="https://www.sciencedirect.com/science/article/abs/pii/S0304380000003549" target="_blank">(Guisan and Zimmermann 2000)</a>.
+
+Regression models (e.g., Generalized linear models-GLMs- and  Generalized Additive Models-GAMs-) or ensemble models (e.g., random forest and boosted regressions) have been used for presence-absence datasets; however these ecological surveys are rare. Presence-only dtasets are more frequent in ecology, so alternative methods have been prososed <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1472-4642.2008.00482.x" target="_blank">(Wisz et al. 2008)</a>. One of this algorithms is the maximum entropy modeling of species geographic distributions algorithm  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">(MaxEnt, see Phillips et al. 2006)</a>, with a <a href="https://www.rdocumentation.org/packages/dismo/versions/1.1-4/topics/maxent" target="_blank">'maxent'</a> function developed in the <a href="https://www.rdocumentation.org/packages/dismo/versions/1.1-4" target="_blank">'dismo'</a> package in R. 
+
+MaxEnt is an algorithm that has been reported to have a high predictive performance compared with other high performing methods <a href="https://onlinelibrary.wiley.com/doi/10.1111/j.0906-7590.2006.04700.x" target="_blank">(Hernandez et al. 2006)</a>. One of the advantages is that Maxent uses presence-only data and is able to cope well with sparse and irregularly sampled data, circumventing the issue of lack of true presence and absence observations in field surveys <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1472-4642.2008.00482.x" target="_blank">(Wisz et al. 2008)</a> and (<a href="https://onlinelibrary.wiley.com/doi/10.1111/j.0906-7590.2006.04700.x" target="_blank">Hernandez et al 2006</a>). Maxent is also "preferable when modelling species that are narrowly distributed and from which not many record locations are available"  <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0063708" target="_blank">(Aguirre-Gutierrez et al. 2013)</a> and (<a href="https://onlinelibrary.wiley.com/doi/10.1111/j.0906-7590.2006.04700.x" target="_blank">Hernandez et al 2006</a>). In addition, the habitat suitability output is a continuous map allowing for the distinction between high and low suitable areas for the species <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">(Phillips et al. 2006)</a>. 
+
+
+The principle, from <a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">(Phillips et al 2006)</a>:
+
+"When approximating an unknown probability distribution, the question arises, what is the best approximation? E.T. Jaynes gave a general answer to this question: the best approach is to ensure that the approximation satisfies any constraints on the unknown distribution that we are aware of, and that subject to those constraints, the distribution should have maximum entropy (Jaynes, 1957). This is known as the maximum-entropy principle."
+
+
+For additional information on Maxent see  <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1472-4642.2010.00725.x%4010.1111/%28ISSN%291472-4642.species-distribution-models-in-conservation-biogeography" target="_blank">(Elith et al. 2013</a>, <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x" target="_blank">Merow et al. 2013</a>, <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">(Phillips et al. 2006)</a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.03049" target="_blank">Philips et al. 2017)</a>.
+
+
+We used the ENMeval v.2.0.0 package <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">(Kass et al  2021</a> and see ENMeval Vignette <a href="https://jamiemkass.github.io/ENMeval/articles/ENMeval-2.0.0-vignette.html#null-models" target="_blank">here</a>) to implement the Maxent algorithm. ENMEval provides functionality to model tuning, methods for partitioning occurrence data and reports multiple performance metrics (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al  2021</a>).
+
+
+<br>
+**Extent of the analysis**
+
+We used the high resolution map of North America from Global Self-consistent, Hierarchical, High-resolution Geography Database  <a href="https://www.ngdc.noaa.gov/mgg/shorelines/" target="_blank">(GSHHG)</a>:
+
++ GSHHS_shp: Shapefiles (polygons) derived from shorelines.
+		   These are named GSHHS_<resolution>_L<level>.
+		+ f : Full resolution.  These contain the maximum resolution
+	    of this data and has not been decimated.
+    + Level 1: Continental land masses and ocean islands, except Antarctica.
+
+We consider the entire geographic range of all species, including data sets for North America for those species going across the Canadian border (see an example below).
+
+
+![](./HSMs_html_outputs/Figures_Macro_doc/NorthAmerica_ecoshape.png)
+
+<a href="#top">Back to top</a>
+
+
+ 
+</details>
+
+
+
+
+<details>
+  <summary> <span style="color:#6699CC">1.2 Data </span>(Click to expand)</summary>
+
+#### **1.2.1. Occurrences: presence-only data**
+
+Access to data sets: NatureServe Canada data, August/2020- October/2021.
+
+<br>
+**a. Type of data**
+
+We used data sets in different formats.
+
++ Points: all points data.
+
++ Polygons: element of occurrence (EOs) and critical habitat.
+
+  + Element of occurrence (EOs): EOs represent an area of land and/or water in which a species or natural community is, or was, present (see <a href="https://www.natureserve.org/conservation-tools/standards-methods/element-occurrence-data-standard" target="_blank">NatureServe</a> for details).
+
+  + Critical habitat: "Critical habitat is defined under section 2 of SARA as: "the habitat that is necessary for the survival or recovery of a listed wildlife species and that is identified as the species' critical habitat in the recovery strategy or in an action plan for the species". Section 49(1)(a) of SARA requires that a species' Recovery Strategy/Action Plan include an identification of the species' critical habitat to the extent possible, based on the best available information, including information provided by the Committee on the Status of Endangered Wildlife in Canada (COSEWIC)" (see <a href="https://open.canada.ca/data/en/dataset/db177a8c-5d7d-49eb-8290-31e6a45d786c" target="_blank">Species at Risk Act, SARA</a>).
+  
++ Lines: transect surveys.
+
+<br>
+**b. Converting polygons and lines to points**
+
+HSMs' algotithms require observations as a 'points' features. So, polygons and lines where converted to raster, using a raster template at ~50m spatial resolution. For lines we applied first a buffer of 25m to convert them to polygons. Then, we converted these grid cells to points, using a 'centroid' option within each ~ 1Km2 grid cell. This procedure has a partial effect for correcting sampling bias (<a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0097122" target="_blank">Fourcade et al 2014</a>).
+
+Finally, we joint all these points sources when available.
+
+
+
+
+<br>
+**c. Spatial filtering**
+
+To avoid issues of spatial sampling and reduce spatial autocorrelation in our HSMs estimates we thinned the occurrence data set of each species using a thinning algorithm (implemented in the <a href="https://cran.r-project.org/web/packages/spThin/index.html" target="_blank">spThin</a> package by <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132" target="_blank">Aiello-Lammens et al 2015</a>), using a distance of 5 Km (we tested various distances, 1, 3, 5). Spatial filtering can also improve model performance (<a href="https://www.sciencedirect.com/science/article/abs/pii/S0304380013005917?casa_token=FMwgrm6KLVAAAAAA:p_5X5bvzDU-yYYWbYt6qh8yDfKORflZE6LuUPxQAWC9vMOYx1YkBzvXJc6rrZ3I0vXhVmiHN#fig0005" target="_blank">Boria et al 2014</a>).
+
+
+
+<br>
+
+#### **1.2.2. Predictors**
+
+We included four groups of predictors with data available across North America: topographic heterogeneity, dynamic habitat indices, climate and distance to water.
+
+**a. Topographic heterogeneity (TH)**
+
+We used two indices of topographic heterogeneity developed by <a href="https://www.nature.com/articles/sdata201840" target="_blank">Amatulli et al 2018</a>. Access date (September 17, 20)  <a href="http://www.earthenv.org/topography" target="_blank">on this website</a>.
+
+Derived topographic continuous variables (see description <a href="https://www.nature.com/articles/sdata201840/tables/2" target="_blank">here</a>):
+
+
+ |DATASET | AGGREGATION |  SOURCES |RESOLUTION |Date downloaded|
+ |--- | --- | --- |--- |--- |
+ | Vector Ruggedness Measure (VRM) | Mean | GMTED2010  |1km|September 17, 2020 |
+ |Roughness |Mean |GMTED2010 |1km|September 17, 2020 |
+ |Eastness |Mean |GMTED2010 |1km|August 2, 2021 |
+ |Northness |Mean |GMTED2010 |1km|August 2, 2021 |
+ |Slope |Mean |GMTED2010 |1km|August 2, 2021 |
+ | | | | | |
+
+GMTED2010: Global Multi-resolution Terrain Elevation Data 2010 dataset (250m resolution).
+
++ Vector Ruggedness Measure (VRM): it "quantifies terrain ruggedness by measuring the dispersion of vectors orthogonal to the terrain surface. Slope and aspect are decomposed into 3-dimensional vector components (in the x, y, and z directions) using standard trigonometric operators, and by calculating the resultant vector magnitude within a user-specified moving window size (in this study 3 × 3)." <a href="https://www.nature.com/articles/sdata201840" target="_blank">(Amatulli et al 2018)</a>.
+
++ Roughness: “Roughness is expressed as the largest inter-cell difference of a focal cell and its 8 surrounding cells.” (Amatulli et al 2018).
+
++ Northness: "a northness value close to 1 corresponds to a northern exposition on a vertical slope (i.e., a slope exposed to very low amount of solar radiation), while a value close to -1 corresponds to a very steep southern slope, exposed to a high amount of solar radiation."
+
+
+<br>
+**a.1. Why topographic heterogeneity is important?**
+
+TH is expected to increase environmental gradients and create multiple niche ecological opportunities. TH can influence the sub-regional variation of abiotic factors (micro/macroclimates, soil composition, hydrological systems) and biotic factors (number of species, population dynamics and species movements, among others, <a href="https://www.nature.com/articles/sdata201840" target="_blank">(Amatulli et al 2018)</a>). In addition, TH can provide shelter and refuge for species and/or small populations during periods of adverse environmental conditions and/or drastic climate change. It has been suggested that heterogeneous environments , offering more potential niches, can promote the coexistence of species therefore might have some effect on the number of species we can find in a site (Habitat heterogeneity hypothesis, <a href="https://www.journals.uchicago.edu/doi/abs/10.1086/282398?casa_token=GRWvM99uL8oAAAAA%3All7XfVMldDWW9lVnJSHBescNgA6DX3uRcWpOSjFtPifN2_2Erya462B_QbfmQ6vSG0-088NvvVk&" target="_blank">Pianka 1966</a>,  <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.0030-1299.2005.12944.x" target="_blank">Cramer and Willig 2004</a>, and empirical evidence in <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ele.12277" target="_blank">Stein et al 2014</a>), among other factors (e.g., <a href="https://www.pnas.org/content/109/43/17495.short" target="_blank">Allouche et al 2012</a>).
+
+Studies have also suggested that TH in concert with other environmental variables can affect geographic range size (<a href="https://www.journals.uchicago.edu/doi/pdfplus/10.1086/282487?casa_token=7kiWv0u33J0AAAAA:LuPy87073HlGU_MXFigtfAMDmYCzSgZV32oAytjRi5v3_IVuRivCF-EQaQ3LwuALdci9TMhUY5I" target="_blank">Janzen 1967</a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1461-0248.2009.01308.x?casa_token=5Vna02JnqzQAAAAA%3AA9d8aSL2Ga8JT0x-GqIqlIZogv7jPImZ8kIJmI938hPmUOU0V7rYQNR3ykuV0KZ_VzGDrDAXrx7dxg" target="_blank">McCain 2009</a> ), species turnover (<a href="https://www.pnas.org/content/105/46/17836.short" target="_blank">Buckley and Jetz et al 2008</a> and <a href="https://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-102710-145113" target="_blank">Fjeldså et al 2012</a>), endemism (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/geb.12469?casa_token=r7CDvDpz9H8AAAAA%3AzyXzs-wL4p8KMFQ5qoQd0ZpwkRXiMKnbWEdmu0m2Rm6CKT1X3EkxEqAP1kB-3XI4-Melz6ncX8l7Pw" target="_blank">Steinbauaer et al 2016</a>) and life-history characteristics (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2656.2008.01491.x" target="_blank">Bears et al 2009</a>).
+
+Slope aspect can significantly influence microclimate and hydrological process that might result in distinct vegetation types, species turnover and species habitats (<a href="https://www.nature.com/articles/s41598-020-73496-0" target="_blank">Yang et al 2020</a>). 
+
+
+
+<br>
+**b. Dynamic Habitat Index (DHI)**
+
+The Dynamic Habitat Index (DHI) is an integrated metric of vegetation production from satellite imagery that measures the fraction of photosynthetically active radiation (or fPAR) intercepted by vegetation (<a href="https://www.sciencedirect.com/science/article/pii/S1470160X08000071?casa_token=r7JKpy2f-ocAAAAA:MxkcwYeyPJx-n8_i4efA3gqAWuXOcebBwILc_faNT1oP2otQFxFiF_Zvzcq9As0n0wTBnW2ATA#bib53" target="_blank">Coops et al 2008</a>). DHI integrates three measures of vegetation productivity a) cummulative annual productivity, b) the minimum level of vegetation cover, and c) the degree of seasonality (<a href="http://silvis.forest.wisc.edu/wp-content/uploads/2018/12/Radeloff_Global_DHIs_RSE_2019.pdf" target="_blank">Radeloff et al 2019</a>). These indices are strongly correlated at global scale, however, local differences emerge among indices when considering geographic ranges of the species.
+
+Access date: November, 2019
+Spatial resolution: 0.0083 decimal degrees (~ 1 Km resolution)
+Datasets downloaded from: (<a href="http://silvis.forest.wisc.edu/data/dhis/" target="_blank">DHI, from the Silvis Lab</a>).
+
+For each index we stacked all years (2003-2015) and calculated the mean.
+
+<br>
+
+**b1. Cummulative annual productivity (CAP, or total greenness, band_1)**
+
+It has been shown that CAP accuratelly predict species range size (<a href="http://silvis.forest.wisc.edu/data/dhis/" target="_blank">Nilsen et al 2005</a>), species richness (<a href="https://www.sciencedirect.com/science/article/abs/pii/S0034425717301682" target="_blank">Hobi et al 2017</a> and, <a href="http://silvis.forest.wisc.edu/wp-content/uploads/2018/12/Radeloff_Global_DHIs_RSE_2019.pdf" target="_blank">Radeloff et al 2019</a>), beta diversity (<a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1466-8238.2011.00676.x" target="_blank">Andrew et al 2012</a>), species abundances (<a href="https://www.sciencedirect.com/science/article/abs/pii/S0034425714002181" target="_blank">Michaud et al 2014</a>) and productivity across various cover types (<a href="https://www.sciencedirect.com/science/article/pii/S1470160X08000071?casa_token=r7JKpy2f-ocAAAAA:MxkcwYeyPJx-n8_i4efA3gqAWuXOcebBwILc_faNT1oP2otQFxFiF_Zvzcq9As0n0wTBnW2ATA#bib53" target="_blank">Coops et al 2008</a>). It has been also used in conservation planning (<a href="https://www.sciencedirect.com/science/article/pii/S0006320713003066?casa_token=J3tCDi6-KqYAAAAA:04FNayJLEgT0gDfqJSKNosS4xkNyrSu7YUaZWxnkDwBHthTukMFfACd9TroJGscyvHyTPOR8#b0170" target="_blank">Powers et al 2012</a>).
+
+
+
+![](./HSMs_html_outputs/Figures_Macro_doc/CAP.png)
+
+
+<br>
+<a href="#top">Back to top</a>
+
+**b2. Minimum Anual Productivity (MAP, band_2)**
+
+"The continual provision of food and habitat resources throughout the year is of particular interest to wildlife conservationists, as changes in the amount and quality of available vegetative cover influences behavior of many herbivorous species, and ultimately, the carnivorous species which prey upon them (Schwartz et al. 2006). Locations without significant snow cover in autumn will maintain a cover of green biomass into winter providing accessible food resources and habitat." (<a href="https://www.sciencedirect.com/science/article/pii/S1470160X08000071?casa_token=r7JKpy2f-ocAAAAA:MxkcwYeyPJx-n8_i4efA3gqAWuXOcebBwILc_faNT1oP2otQFxFiF_Zvzcq9As0n0wTBnW2ATA#bib53" target="_blank">Coops et al 2008</a>).
+
+![](./HSMs_html_outputs/Figures_Macro_doc/MAP_B2.png)
+
+
+**b3. Variation of Annual productivity (MAP, band_3)**
+
+"Sites with low seasonality are indicative of areas that have consistent vegetation production throughout the year such as evergreen forests" (<a href="https://www.sciencedirect.com/science/article/pii/S1470160X08000071?casa_token=r7JKpy2f-ocAAAAA:MxkcwYeyPJx-n8_i4efA3gqAWuXOcebBwILc_faNT1oP2otQFxFiF_Zvzcq9As0n0wTBnW2ATA#bib53" target="_blank">Coops et al 2008</a>).
+
+
+![](./HSMs_html_outputs/Figures_Macro_doc/VAP_B3.png)
+
+<br>
+**c. Climate**
+
+Nineteen (19) bioclimatic variables from <a href="https://www.worldclim.org/data/worldclim21.html" target="_blank">Worldclim</a> (<a href="https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/joc.1276" target="_blank">Hijmans et al 2005</a>) were used in this analysis for both 'Historical' and 'Projected' climate.
+
+- BIO1:  Annual Mean Temperature
+- BIO2:  Mean Diurnal Range (Mean of monthly (max temp - min temp))
+- BIO3:  Isothermality (BIO2/BIO7) (* 100)
+- BIO4:  Temperature Seasonality (standard deviation *100)
+- BIO5:  Max Temperature of Warmest Month 
+- BIO6:  Min Temperature of Coldest Month 
+- BIO7:  Temperature Annual Range (BIO5-BIO6)  
+- BIO8:  Mean Temperature of Wettest Quarter  
+- BIO9:  Mean Temperature of Driest Quarter  
+- BIO10: Mean Temperature of Warmest Quarter  
+- BIO11: Mean Temperature of Coldest Quarter  
+- BIO12: Annual Precipitation  
+- BIO13: Precipitation of Wettest Month  
+- BIO14: Precipitation of Driest Month  
+- BIO15: Precipitation Seasonality (Coefficient of Variation)  
+- BIO16: Precipitation of Wettest Quarter  
+- BIO17: Precipitation of Driest Quarter  
+- BIO18: Precipitation of Warmest Quarter  
+- BIO19: Precipitation of Coldest Quarter  
+
+<br>
+**c.1. Historical climate**
+
++ Time period: Historical data for 1970-2000
++ Version: WorldClim v 2.1 
++ Access date: June, 2020
++ Spatial resolution: 30 seconds (~1 km)
+
+<br>
+**c.2. Projected climate**
+
++ Time period: Future 2050 (average for 2041-2060)
++ Access date: June, 2020
++ Spatial resolution: 30 seconds (~1 km)
++ Datasets can be downloaded from Worldclim <a href="https://worldclim.org/data/cmip5_30s.html#2050" target="_blank">here</a> 
+
+For each projected bioclimatic variable (n=19), we downloaded data for three Global Circulation Models (GCMs) and for two Representative Concentrations Pathwways (RCPs), as described below. Then, we averaged all GCMs within each RCP for each variable. This average was used to implement HSMs for future climate scenarios.  In addition, and as a measure of uncertainty, we calculated the coefficient of variation (cv, a measure of dispersion among all GCMs) for each bioclim variables. We expect low values of 'cv' across space for all bioclim variables, meaning that low uncertainty and realibility of the data sets.
+
+Collaborative framework:
+
+We used the Coupled Model Intercomparison Project (CMIP)-Phase 5 which is a collaborative framework aimed to improve the knowledge on climate change (<a href="https://en.wikipedia.org/wiki/Coupled_Model_Intercomparison_Project" target="_blank">CMIP</a>). We will update this as soon as the new CMIP6 datasets are available online.
+
+Global Circulation Models (GCMs):
+
+GCMs are mathematical models of the general circulation of the atmosphere and allow predictions of future scenarios of cliamte change (<a href="https://www.ipcc-data.org/guidelines/pages/gcm_guide.html" target="_blank">GCMs</a>). We screened and selected GCMs based on previous published evaluations (e.g., <a href="https://journals.ametsoc.org/jcli/article/26/23/9209/99448/North-American-Climate-in-CMIP5-Experiments-Part-I" target="_blank">Sheffield et al 2013</a>) and also on information available for all bioclimatic variables. These are the GCMs selected:
+ 
++  Community Climate System
+Model version 4 (<a href="http://www.cesm.ucar.edu/models/ccsm4.0/" target="_blank">CCSM4</a>)
++ Hadley Centre Global Environment Model version 2-Earth System (<a href="https://portal.enes.org/models/earthsystem-models/metoffice-hadley-centre/hadgem2-es" target="_blank">HadGEM2-ES</a>)
++ Model for Interdisciplinary Research on Climate version 5 (<a href="http://www.icesfoundation.org/Pages/ScienceItemDetails.aspx?siid=181" target="_blank">MIROC-ESM</a>)
+  
+Representative Concentrations Pathwways (RCPs):
+  
+<a href="https://en.wikipedia.org/wiki/Representative_Concentration_Pathway" target="_blank">RCPs</a> are greenhouse concentration (not emissions) trajectories adopted by <a href="https://www.ipcc-data.org/guidelines/pages/glossary/glossary_r.html" target="_blank">IPCC</a>, describing different climate futures (as shown in the graph below and see data <a href="http://www.pik-potsdam.de/~mmalte/rcps/" target="_blank">here</a>).
+
+We used two contrasting RCPs for the analysis:
+
++ RCP4.5: more or less stable throughout the century (radiative forcing is stabilised at approximately 4.5 W m-2)
++ RCP8.5: extreme scenario (radiative forcing reaches greater than 8.5 W m-2 by 2100 and continues to rise for some amount of time). 
+
+![](./HSMs_html_outputs/Figures_Macro_doc/climate_scenarios.png)
+
+
+<br>
+**c.3. Why climate is important?**
+
+Climate has shown to be an important driver of species distributions (e.g., <a href="https://www.jstor.org/stable/3683759?casa_token=eQ5o8GkHg94AAAAA%3AOA2qfrLh96hBOnFZjuBVEuQX8bFkUtuiwJLcFXZIuSGIfDG__EP6waRy9p6ydTGgyxwgdIeOmFzX_ojd8POBjOynQXHPpHcQSM1rbDIlnzB4pfk0hA&seq=1#metadata_info_tab_contents" target="_blank">Araujo et al 2005</a>, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3138609/" target="_blank">Davies et al 2011</a>, and  <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/geb.12232" target="_blank">Vásquez & Currie 2014</a>), and climate change might threatens conservation areas and biodiversity (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1461-0248.2011.01610.x" target="_blank">Araujo et al 2011</a> and <a href="https://royalsocietypublishing.org/doi/full/10.1098/rspb.2018.0792" target="_blank">Newbold 2018</a>).
+
+
+<br>
+
+
+
+**d. Water**
+We recognized the importance of freshwater bodies for species presence, so we constructed two metrics using lakes from <a href="https://hydrosheds.org/page/hydrolakes" target="_blank">HydroLakes v1</a>.
+
+**d1. Distance to water**
+
+We calculated the distance to from every single grid cell in the study region to the nearest grid cell representing a lake.
+
+**d2. Percentage of grid cells (100Km2) that represent lakes within a 1Km2 grid cell**
+
+We calculated the percentage of grid cells (100Km2) that repesent lakes within a 1Km2 grid cell.
+
+
+<a href="#top">Back to top</a>
+</details>
+
+
+
+<details>
+  <summary><span style="color:#6699CC">1.3 Model fitting</span> (Click to expand)</summary>
+
+**1.3.1. Multicollinearity**
+
+We used a correlation coefficient threshold of 0.7 (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2012.07348.x">Dormann et al 2012</a>) to select a set of uncorrelated variables, using <a href="http://127.0.0.1:19644/library/virtualspecies/html/removeCollinearity.html" target="_blank">removeCollinearity</a> fucntion from the <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01388" target="_blank">virtualspecies</a> package in R.
+<br>
+
+
+![](./HSMs_html_outputs/Figures_Macro_doc/Multicollinearity.png)
+
+
+<br>
+
+**1.3.2. Evaluating multiple models**
+
+
+We used the ENMeval package (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12261" target="_blank">Muscarrella et al  2014</a>) to evaluate a series of candidate models with various settings (see ENMeval Vignette <a href="https://cran.rstudio.com/web/packages/ENMeval/vignettes/ENMeval-vignette.html#plot.preds" target="_blank">here</a>), including multiple features classes (FCs; adding more FCs enables more complexity) and minimizing overfitting via regularization multipliers (RMs; penalizing "the inclusion of additional parameters that result in little or no ‘gain’ to the model" <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12261" target="_blank">Muscarrella et al  2014</a>). The ENMeval package implements the MaxEnt algorithm.
+
+<br>
+
+**1.3.3. Number of observations and model performance**
+
+Model building (e.g., type of features, partition method; see next section) and performance is mediated by the number of species occurrences available. 
+
+Although Maxent has been reported to perform well among various algorithms <a href="https://onlinelibrary.wiley.com/doi/10.1111/j.0906-7590.2006.04700.x" target="_blank">(Hernandez et al. 2006)</a> and is less sensitive to sample size; there is also some concern that this algorithm (and others) does not predict "consistently well with small sample size (n < 30) and this should encourage highly conservative use of predictions based on small sample size and restrict their use to exploratory modelling" <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1472-4642.2008.00482.x" target="_blank">(Wisz et al 2008)</a>. 
+
+
+Some studies have reported that the minimum number of occurrences required to obtain good model fitting range from 14 for range restricted species to 25 for widespread species <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.01509" target="_blank">(van Proosdij et al 2015)</a>. Others, based on empirical studies have recommended 13 as the minimum sample size (Randal, personal communication).
+
+There is also a general rule of thumb that the minimum sample size (number of occurrences from presence-only data sets) should be 10 times larger the number of variable predictors to reduce model overfitting <a href="https://www.scinapse.io/papers/2108191500" target="_blank">(Harrell et al 1996)</a>. However, for species with small number of occurrences, maintaining this ratio (1:10) is quite challenging (e.g., species with 30 occurrences will allow to include only 3 predictors). A promising area of study is the implementation ensemble bivariate small models <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12403" target="_blank">(Brenier et al 2015)</a>, that can circumvent the limitation of small number of occurrences. Now, Maxent standard methods seems to still perform well for this exploratory analysis. 
+
+Here, we allowed the algorithm to run the analysis and identified model usefulness based on performance metrics.
+
+ <br>
+
+
+**1.3.4. Model settings**
+
+
+**a. Optimization of model parameters**
+
+Because it is computationally prohibitive including all potential feature combinations within a model, we constructed models including as much complexity as we could (i.e., combining FCs and RMs). For instance,in complex models we combined 5 FCs and 3 RMs for a total of 15 models.
+
+
+**d1. Features types**
+
+"The idea of Maxent is to estimate a target probability distribution by finding the probability distribution of maximum entropy (i.e., that is most spread out, or closest to uniform), subject to a set of constraints that represent our incomplete information about the target distribution. The information available about the target distribution often presents itself as a set of real-valued variables, called “features”, and the constraints are that the expected value of each feature should match its empirical average (average value for a set of sample points taken from the target distribution). When Maxent is applied to presence-only species distribution modeling, the pixels of the study area make up the space on which the Maxent probability distribution is defined, pixels with known species occurrence records constitute the sample points, and the features are climatic variables, elevation, soil category, vegetation type or other environmental variables, and functions thereof." (<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al 2006</a>).
+
+
+In summary, "features" constrain the computed probability distribution and represent ecological assumptions (i.e., predictors that cosntrain the geographical distribution of the species <a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">(Phillips et al 2006)</a>
+
+The available feature types are and see description in (<a href="https://www.mdpi.com/1999-4907/11/3/302" target="_blank">Li et al 2020</a>):
+
++ Linear (L): "Linear features constrain the output distribution for each species to have the same expectation of
+each of the continuous climate variables as the sample locations for that species. A linear feature
+is simply one of the continuous climate variables".
+
++ Quadratic (Q):"Quadratic features (when used together with linear features) constrain the output distribution
+to have the same expectation and variance of the climate variables as the samples. A quadratic
+feature is the square of one of the continuous climate variables".
+
+
++ Product (P): "A product feature is the product of two continuous climate variables; when used with linear
+and quadratic features, product features constrain the output distributions to have the same
+covariance for each pair of climate variables as the samples".
+
+
++ Threshold (T): "A threshold feature is derived from a continuous climate variable. For a threshold value v, the
+threshold feature is binary (taking values 0 and 1) and is 1 when the variable has value greater than
+v. The effect of a threshold feature is to make the total probability of grid cells with a value greater
+than the threshold be equal to the fraction of sample locations with the value above the threshold v".
+
++ Hinge (H): "A hinge feature is also derived from a continuous environmental variable. It is like a linear
+feature, but it is a constant below a threshold v".
+
+
+
+**d2. Features types and observations**
+
+We selected the type of features according to the number of observations (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x" target="_blank">Merow et al  2013</a>), as follow :
+
+| Features_type  |Number of Observations |
+|---|---|
+| None  | 1  | 
+| Linear(L)  |>2  | 
+| Quadratic(Q)   | >10|
+| |Hinge(H)   | >15 |
+| Threshold(T)  |>80  |
+| Product(P)  |>80 | 
+|---|---|
+
+
+
+**d3. Feature combinations (FCs)**
+
+  + Less than 10 observations (L)
+  + 11 - 15 observations (L, Q, LQ)
+  + 16 - 80 observations (L, Q, LQ, H, QH)
+  + More than 80 observations (Q, H, LQ, LQP, QPT).
+
+  
+Note1: "Linear features are special cases of hinge features, so it is redundant to use L and H features simultaneously" (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008</a>).
+
+
+Remember that the number of parameters retained in the final best model is a function of the number features created in model fitting, which in turn depends on the number of observations and predictors.  For instance, 
+
++ Linear features: one per predictor
+
++ Product features: it is calculated as follow: predictors!/pairs!(Observations-2)
+
+
++ Feature combinations can lead to high number of features created in model fitting, therefore more parameters in the model. "For example, if there are 100 presence observations the number of piecewise features is given by: 3 (types of piecewise functions) × 99 (pairs of data point) × 19 (predictors) = 5643.  This collection of features is explored by MaxEnt, and the most useful features are extracted." (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x" target="_blank">Merow et al  2013</a>). 
+
+
+**d4. Regularization multiplier (RM)**
+
+The RM prevents model over-fittig and smooths the distribution, making it more regular.
+
+"A smaller RM value will result in a more localized output distribution that fits the given occurrence records better, but is more prone to overfitting. Overfitted models are poorly transferable to novel environments and, thus, not appropriate to project distribution changes under environmental change. A larger RM value will produce a prediction that can be applied more widely." (<a href="https://www.mdpi.com/1999-4907/11/3/302" target="_blank">Li et al 2020</a>).
+
+"More complex feature classes will require more regularization to yield accurate predictions." <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík (2008)</a>
+
+We used regularization values (RMs) proposed by (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008</a>), based on number of observations. We evaluated these RMs.
+
++ 0.05
++ 0.50
++ 1.00 (Default in MaxEnt)
+  
+**d5. Data partitioning method**
+
++ Crossvalidate (More than 25 observations; kfolds=10). 
++ K-1 Jackknife (less than 25 observations). 
+
+
+**d6. Model complexity**
+
+Note that it is computationally prohibitive including all potential feature combinations within ENMeval evalution (i.e., more complexity). So, we tried to include and evaluate as much compleity as we could.  As a result, the more complex set of candidates models is 15, combining 5 FCs (Q, H, LQ, LQP, QPT) and 3 RMs (0.05, 0.5, 1).
+
+
+**d7. The effect of number of background points and sampling bias**
+
+We selected the best model within each of these six groups of models based on the lowest AICc value (i.e., six best models). Then we selected from this list of six models the 'best model' based on the highest AUC value. Further analysis were beased on this 'best model'.
+
+
++ Background points (bg_points).
+
+  + If number grid cells are smaller than 100,000 then we tested (20%, 40%, 60% of the grid cells as a bacground points).
+  + If number grid cells are greater than 100,000 then we tested (5%, 10%, 20% of the grid cells as a bacground points).
+
++ Minimizing sampling bias.
+ Sampling bias is the result of different sampling efforts across environmental space, resulting in models predicting more sampling effort than habitat suitability areas for the species (<a href="https://www.sciencedirect.com/science/article/pii/S1574954120300364" target="_blank">Moua et al 2020</a>). <a href="https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1890/07-2153.1" target="_blank">Phillips et al (2009)</a> proposed that choosing background data with the same bias as presence data can minimize sampling bias. Here we constructed a sampling bias layer using observation points (i.e., two-dimensional kernel density estimate, using the kde2d function from MASS package).
+
+  + No_minimizing_bias: the sampling area for 'Background points' included grid cells from the entire geographic range .
+  + Minimizing_bias: the sampling area for 'Background points' included only grid cells from the the bias layer for the species .
+  
+![](./HSMs_html_outputs/Figures_Macro_doc/Sampling_bias.png)
+  
+  
+
+
+
+<a href="#top">Back to top</a>
+</details>
+
+
+
+<details>
+  <summary><span style="color:#6699CC">1.4 Model Assessment</span> (Click to expand)</summary>
+
+
+**a. Approach**
+ 
+We implemented a sequential method to select the  best model using two performance metrics.  This approach uses cross-validation results by selecting models with the **lowest average test omission rate**, and to break ties, with the **highest average validation AUC** <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.04886" target="_blank">(Kass et al 2020 </a> and <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/jbi.12227" target="_blank">Radosavljevic & Anderson 2014)</a>. Further analysis were based on this 'best model'.
+
+
++ Omission rate (OR) indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006</a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): (0 - 0.25, the model can be informative; 0.25 - 0.50, there is some concern in model predictions; > 0.50 there is high concern in model predictions). Omission rate values(or.10p.avg).
+
+
++ **AUC values** are "the probability that a random positive instance and a random negative instance are correctly ordered by the classifier." (<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006</a>). AUC values above 0.75 are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008</a>).  AUC values(auc.val.avg).
+
+
+The graph below compares the **average test omission rate** (y-axis) across multiple **regularization values** (rm, x-axis). Features (groups in colors) with NA values are not shown in the graph, see summarizing tables below for details).
+
++ Columns represent controlling for sampling bias
+  + Panels in first column = using bias layer
+  + Panels in second column = No_bias layer
+  
++ Rows represent testing various background points = 20%, 40% and 60% of grid cell from the geographic range
+<br>
+
+
+![](./HSMs_html_outputs/Figures_Macro_doc/or_rm.png)
+
+
+<br>
+
+
+
+
+The graph below compares the **average validation AUC** (y-axis) across multiple **regularization values** (rm, x-axis). Features (groups in colors) with NA values are not shown in the graph, see summarizing tables below for details).
+
+Note that AUC values above 0.75 (blue dashed line) are considered potentially useful <a href="https://link.springer.com/chapter/10.1007/0-387-22648-6_4" target="_blank">(Elith. 2002 </a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.0906-7590.2008.5203.x" target="_blank">Phillips and Dudík 2008)</a>.
+
+![](./HSMs_html_outputs/Figures_Macro_doc/auc.png)
+
+<br>
+**b. Variables importance**
+
++ Permutation importance: "for each environmental variable in turn, the values of that variable on training presence and background data are randomly permuted. The model is reevaluated on the permuted data, and the resulting drop in training AUC is shown in the table, normalized to percentages. " (from <a href="https://www.rdocumentation.org/packages/dismo/versions/1.1-4" target="_blank">'dismo'</a>).
+
+An example is presented below for variable importance:
+
+![](./HSMs_html_outputs/Figures_Macro_doc/variable_importance.png)
+<br>
+
+
+
+
+
+
+<a href="#top">Back to top</a>
+
+**c. Best model (parameters)**
+
+We used the eval.models function from the ENMeval package to identify the best model.
+
+The table below presents a summary of model parameters for the best model.  We used this model for further analyses.
+
+![](./HSMs_html_outputs/Figures_Macro_doc/table.png)
+
+
+
+
+
+
+</details>
+
+
+
+<details>
+  <summary><span style="color:#6699CC">1.5 Model predictions</span> (Click to expand)</summary>
+
+
+We used the eval.predictions function from ENMeval to create the habitat suitability map from the best model(see figure below).
+<br>
+
+![](./HSMs_html_outputs/Figures_Macro_doc/stats.png)
+
+
+
+
+<a href="#top">Back to top</a>
+</details>
+
+
+<details>
+  <summary><span style="color:#6699CC">1.6 Uncertainty map</span> (Click to expand)</summary>
+
+
+
+The map shows a measurement of uncertainty based on the coefficient of variation among 10 HSA maps generated in model fitting.
+<br>
+
+![](./HSMs_html_outputs/Figures_Macro_doc/uncertainty.png)
+
+
+</details>
+
+
+<details>
+  <summary><span style="color:#6699CC">1.7 R packages</span> (Click to expand)</summary>
+
+
+We used R version 3.6.3 [64-bit] for all analyses (<a href="https://www.r-project.org/" target="_blank">R Core Team, 2018</a>) and the following R packages:
+
++ <a href="https://www.rdocumentation.org/packages/dismo/versions/1.1-4" target="_blank">'dismo'</a> was used to run HSMs.
++ <a href="https://forcats.tidyverse.org/" target="_blank">'forcats'</a>, was used for reordering numbers
++ <a href="https://ggplot2.tidyverse.org/" target="_blank">'ggplot2'</a> was used to create graphics.
++ <a href="https://cran.r-project.org/web/packages/raster/raster.pdf" target="_blank">‘raster’</a> was used to manage raster data sets (Hijmans and van Etten 2014).
++ <a href="https://cran.r-project.org/web/packages/sf/index.html" target="_blank">‘sf’</a> was used to manage vector data sets.
++ ‘virtualspecies’ was used to remove collinearity among variables within a raster stack <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01388#:~:text=virtualspecies%20is%20a%20freely%20available,to%20improve%20species%20distribution%20models.&text=The%20package%20also%20includes%20a%20function%20to%20generate%20random%20virtual%20species%20distributions." target="_blank">(Leroy et al. 2016)</a>.
+
++ <a href="https://cran.r-project.org/web/packages/spThin/index.html" target="_blank">spThin</a>, was used for spatial  filtering (i.e., thinning the data set to reduce the effect of sampling bias and spatial autocorrelation)  <a href="https://onlinelibrary.wiley.com/doi/10.1111/ecog.01132" target="_blank">Aiello-Lammens et al 2015</a>.   
+
++ ENMeval package <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12261" target="_blank">(Muscarrella et al  2014)</a> to evaluate a series of candidate models with various settings (see ENMeval Vignette <a href="https://cran.rstudio.com/web/packages/ENMeval/vignettes/ENMeval-vignette.html#plot.preds" target="_blank">here</a>).
+
++  "readxl": to read read Excel tables
+
++ "arcgisbinding" to transfer data from ArcGIS NatureServe dataset in ArcGIS Pro) to R.
+
++ <a href="https://kapitzas.github.io/post/worldclimtiles/" target="_blank">devtools::install_github("kapitzas/WorldClimTiles")</a>: donwnload and merge bioclim tiles. 
+
+
++ MASS::kde2d: to create density map based on observations.
+
+
+<br>
+
+
+<a href="#top">Back to top</a>
+</details>
+
+
+
+
+<details>
+  <summary><span style="color:blue">2. POTENTIAL AREAS IDENTIFICATION</span> (Click to expand)</summary>
+
+We used Kernel analysis (three radius) to evaluate whether high suitable areas (HSA = 0.75 to 1.00) were clumped, allowing the identification of discrete potential sites to harbor KBAs.
+
+We used Kernel density estimator by transforming high suitable areas into points and computing an isotropic kernel intensity estimate of the point pattern. We evaluated various radious (3 Km, 4 Km and 5Km) to calculate the density of points within that radious-window.
+
+We tested here the highest percentile of the HSA map (HSA = 0.75 to 1.00).
+
+Preliminary analysis showed that 5Km window better differentiate clusters within the landscape.
+
+![](./HSMs_html_outputs/Figures_Macro_doc/cluster.png)
+<br>
+
+**R packages**
+
++ <a href="https://cran.r-project.org/web/packages/spatstat/index.html" target="_blank">'spatstat'</a> was used this for kernel density analysis.
+
++ <a href="https://cran.r-project.org/web/packages/stars/index.html" target="_blank">'stars'</a> was used this to convert raster to polygon.
+ 
+ 
+
+<a href="#top">Back to top</a>
+</details>
+
+
+
+
+<details>
+  <summary><span style="color:blue">4. CLIMATE CHANGE EFFECT</span></summary>
+
+
+The effects of climate change on species distributions have been broadly documented (e.g., <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1365-2486.2011.02413.x" target="_blank">McKenney et al 2011</a>, <a href="https://www.nature.com/articles/nclimate2448" target="_blank">Pacifici et al 2015</a>) and also the ability of species to track climate change (e.g., <a href="https://www.pnas.org/content/109/22/8606.short" target="_blank">Schloss et al 2012</a>). Therefore, high suitable areas identified by HSMs under historical conditions (current climate) can be different in the future.
+
+We compared models using current climate with two projected climate scenarios:
+
+![](./HSMs_html_outputs/Figures_Macro_doc/hsm_climate.png)
+
+We also included the spatial distribution of the major climate changes within the geographic range of each species.
+
+We calculated the spatial distribution of the major climate changes within the geographic range of each species, using this formula:
+
+HSA change = current HSA - projected HSA.
+
+‘Lossing (-)’ suitable areas are shown in red, while blue areas indicate ‘gaining’ suitable areas in the future. Yellow color (zero values) indicates no change at all in the suitable areas.
+ 
+![](./HSMs_html_outputs/Figures_Macro_doc/climate_changes.png)
+
+<a href="#top">Back to top</a>
+</details>
+
+ 
+
+
+<details>
+  <summary><span style="color:blue">5. ACKNOWLEDGEMENTS</span></summary>
+  
+  <br>
+  
+Juan Zuloaga wants to thanks funding from Liber-Ero – Biodiversity Conservation 
+
+
+We would like also to thanks some researchers that contributed to this research:
+
+
+Planning:
+
++ Ciara Raudsepp_Hearne (KBA Canada coordinator)
+
+Datasets:
+
++ Chloé Debyser (KBA Canada Technical Coordinator)
++ Randal Green (NatureServe Canada, Technical Coordinator, EBAR Project)
++ Christine Terwissen (NatureServe Canada, National Coordinator, EBAR Project)
+
+HSMs reviewrs:
+
++ Maria Leung (Yukon species expert)
++ Richard Schuster (Carleton University)
++ Jacqueline Clare (BC Conservation Data Centre)
++ Varina Crisfield (Sherbrook University)
++ Guillaume Blanchet (Sherbrook University)
++ Dave Fraser 
+
+Software troubleshooting:
+
++ Guillaume Larocque (McGill University)
++ Val Lucet (McGill University)
++ Gonzalo Pinilla (CUNY)
+
+
+
+  
+  <a href="#top">Back to top</a>
+</details>
+  
+  
+
+
+
+
+
