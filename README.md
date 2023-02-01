@@ -17,7 +17,7 @@ Screening potential areas for <a href="http://www.kbacanada.org/" target="_blank
 We first evaluated habitat suitability models relating species presence-only data sets and predictor variables, using the  <a href="https://www.sciencedirect.com/science/article/pii/S030438000500267X" target="_blank">Maxent algorithm</a> implemented in the  ENMeval v.2.0.0 package in R (<a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13628?campaign=woletoc" target="_blank">Kass et al 2021</a>). Then, we used cluster analysis to identify discrete polygons containing most of the high suitable areas.
 
 ## Structure of this report
-<a href="[http://www.kbacanada.org/](https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html)" target="_blank">Master document</a>: In this document you will find five sections
+<a href="https://quebio.ca/kba/MAcro_KBAs_HSMs_Sites_Canada.html" target="_blank">Master document</a>: In this document you will find five sections
 - Overview
 - Workflow
 - Results (summarized below)
