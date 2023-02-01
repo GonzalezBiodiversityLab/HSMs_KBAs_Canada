@@ -34,7 +34,7 @@ The Markdown files to create the html **species' reports** are:
 - `Output_KBAs_v7.Rmd`: it generates a html full report for species with model predictions.
 
 ## Data
-In this link (data_inputs) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. If you want to download the zipped file setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
+In this link (<a href="https://object-arbutus.cloud.computecanada.ca/KBACAN/data_inputs.zip" target="_blank">data_inputs.zip 3.3GB</a>) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. If you want to download the zipped file setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
 - Species: WCS-KBAs provided an Excel table with a set of potential species for analysis.
 - Observations: we were granted access to the NatureServe Canada datasets via ArcGIS Pro.
 
@@ -61,8 +61,7 @@ There is a group of species where we were unable to run run HSMs.  We identified
 **2. Species with HSMs predictions**
 
 For this group of species we were able to run HSMs and classified them based on one of the model performance metric "Omission rate (OR)", as follow:
-Note: Intermediate results (maps, tables, etc) for each species can be accessed here.
-<a href="https://object-arbutus.cloud.computecanada.ca/KBACAN/Intermediate.zip" target="_blank">here - ~365MB</a>
+Note: Intermediate results (maps, tables, etc) for each species can be accessed <a href="https://object-arbutus.cloud.computecanada.ca/KBACAN/Intermediate.zip" target="_blank">here - Intermediate.zip  ~365MB</a>
 
 Omission rate (OR) indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): 
 
