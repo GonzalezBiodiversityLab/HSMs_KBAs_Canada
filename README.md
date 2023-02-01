@@ -62,6 +62,7 @@ There is a group of species where we were unable to run run HSMs.  We identified
 
 For this group of species we were able to run HSMs and classified them based on one of the model performance metric "Omission rate (OR)", as follow:
 Note: Intermediate results (maps, tables, etc) for each species can be accessed here.
+<a href="https://object-arbutus.cloud.computecanada.ca/KBACAN/Intermediate.zip" target="_blank">here - ~365MB</a>
 
 Omission rate (OR) indicates the "fraction of the test localities that fall into pixels not predicted as suitable for the species. A low omission rate is a necessary (but not sufficient) condition for a good model."(<a href="https://www.sciencedirect.com/science/article/abs/pii/S030438000500267X" target="_blank">Phillips et al., 2006 </a>). There is no thresholding rule developed yet to determine the optimal threshold for the omission rate, so we suggest this provisional relative scale (is the model potentially useful?): 
 
