@@ -11,7 +11,7 @@
 # A1 (threatened species) and B1 (geographically restricted species)
 #               criteria defined in the KBA standard.                      #
 #                                                                          #
-#  by Juan Zuloaga (Post-doctoral Researcher) & A7ysundrew Gonzalez (Professor)# 
+#  by Juan Zuloaga (Post-doctoral Researcher) & Prof. Andrew Gonzalez     # 
 #                     McGill University                                    #
 #                                                                          #
 #                         August 2020                                    #
