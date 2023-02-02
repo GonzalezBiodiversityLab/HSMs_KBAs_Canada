@@ -34,9 +34,10 @@ The Markdown files to create the html **species' reports** are:
 - `Output_KBAs_v7.Rmd`: it generates a html full report for species with model predictions.
 
 ## Data
-In this link (<a href="https://object-arbutus.cloud.computecanada.ca/KBACAN/data_inputs.zip" target="_blank">data_inputs.zip 3.3GB</a>) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. If you want to download the zipped file setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
+
++ Environmental/administrative layers: in this link (<a href="https://object-arbutus.cloud.computecanada.ca/KBACAN/data_inputs.zip" target="_blank">data_inputs.zip 3.3GB</a>) you will find a zipped file with environmental layers (.tif files), shapefiles and Excel tables. If you want to download the zipped file setwd("C:/HSMs_KBAsCan") in your PC and unzipped the file to create a `data_input` folder.
 - Species: WCS-KBAs provided an Excel table with a set of potential species for analysis.
-- Observations: we were granted access to the NatureServe Canada datasets via ArcGIS Pro.
+- Observations: we were granted access to the NatureServe Canada datasets.
 
 ## Software
 We used  R (x64 3.6.1) and several packages described in the methods section in the master document.
